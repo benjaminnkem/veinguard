@@ -20,6 +20,14 @@ class Settings(BaseSettings):
         default="../../data/calibration",
         alias="CALIBRATION_DATA_DIR",
     )
+    georeference_data_dir: str = Field(
+        default="../../data/georeference",
+        alias="GEOREFERENCE_DATA_DIR",
+    )
+    fixture_data_dir: str = Field(
+        default="../../data/fixtures",
+        alias="FIXTURE_DATA_DIR",
+    )
     max_concurrent_simulations: int = Field(default=1, alias="MAX_CONCURRENT_SIMULATIONS")
     simulation_timeout_seconds: int = Field(default=120, alias="SIMULATION_TIMEOUT_SECONDS")
     thermal_model_version: str = Field(default="water-temp-v1", alias="THERMAL_MODEL_VERSION")

@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from veinguard_sim import __version__
+from veinguard_sim.api.baseline import router as baseline_router
 from veinguard_sim.api.chlorine import router as chlorine_router
 from veinguard_sim.api.monochloramine import router as monochloramine_router
 from veinguard_sim.api.networks import router as networks_router
@@ -129,3 +130,4 @@ app.include_router(simulations_router)
 app.include_router(thermal_router)
 app.include_router(chlorine_router)
 app.include_router(monochloramine_router)
+app.include_router(baseline_router)

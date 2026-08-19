@@ -71,6 +71,7 @@ def step_thermal_network(
     calibration: ThermalCalibration,
     source_temperature_c: float,
     solar_irradiance_w_m2: float | None = None,
+    node_air_temperature_c: dict[str, float] | None = None,
     mix_iterations: int = 8,
 ) -> ThermalState:
     soil = step_soil_temperature(
@@ -79,6 +80,20 @@ def step_thermal_network(
         timestep_seconds,
         calibration,
     )
+
+    def boundary_for(node_id: str) -> tuple[float | None, bool]:
+        if node_air_temperature_c is None:
+            return soil, False
+        local_air = node_air_temperature_c.get(node_id)
+        if local_air is None:
+            return None, True
+        local_soil = step_soil_temperature(
+            local_air,
+            local_air,
+            timestep_seconds,
+            calibration,
+        )
+        return local_soil, False
     temps = {node_id: node.temperature_c for node_id, node in state.node_temperature_c.items()}
     prev_outlet = {
         node_id: node.temperature_c for node_id, node in state.node_temperature_c.items()
@@ -98,21 +113,25 @@ def step_thermal_network(
         for link in network.links:
             upstream, downstream = _upstream(link)
             inlet = temps.get(upstream, source_temperature_c)
-            outlet, link_flag = pipe_outlet_temperature(
-                inlet_temperature_c=inlet,
-                boundary_temperature_c=soil,
-                length_m=link.length_m,
-                diameter_m=link.diameter_m,
-                flow_m3s=link.flow_m3s,
-                timestep_seconds=timestep_seconds,
-                closed=link.closed,
-                calibration=calibration,
-                previous_outlet_c=prev_outlet.get(downstream),
-            )
+            boundary, uncovered = boundary_for(upstream)
+            flags.setdefault(link.link_id, [])
+            if uncovered or boundary is None:
+                outlet, link_flag = inlet, "NO_THERMAL_COVERAGE"
+            else:
+                outlet, link_flag = pipe_outlet_temperature(
+                    inlet_temperature_c=inlet,
+                    boundary_temperature_c=boundary,
+                    length_m=link.length_m,
+                    diameter_m=link.diameter_m,
+                    flow_m3s=link.flow_m3s,
+                    timestep_seconds=timestep_seconds,
+                    closed=link.closed,
+                    calibration=calibration,
+                    previous_outlet_c=prev_outlet.get(downstream),
+                )
             outlets[link.link_id] = outlet
             if not link.closed:
                 incoming[downstream].append((abs(link.flow_m3s), outlet))
-            flags.setdefault(link.link_id, [])
             if link_flag not in flags[link.link_id]:
                 flags[link.link_id].append(link_flag)
 
@@ -144,31 +163,39 @@ def step_thermal_network(
         t_in = tank_inflow_temp.get(tank.node_id, source_temperature_c)
         if inflow > calibration.stagnant_flow_m3s:
             t_in = inflow_heat / inflow
-        updated, tank_flags = step_tank_temperature(
-            temperature_c=temps.get(tank.node_id, source_temperature_c),
-            inflow_temperature_c=t_in,
-            inflow_m3s=inflow,
-            volume_m3=tank.volume_m3,
-            diameter_m=tank.diameter_m,
-            level_m=tank.level_m,
-            air_temperature_c=air_temperature_c,
-            timestep_seconds=timestep_seconds,
-            calibration=calibration,
-            solar_irradiance_w_m2=solar_irradiance_w_m2,
-        )
-        temps[tank.node_id] = updated
-        flags[tank.node_id] = tank_flags
+        tank_air, tank_uncovered = boundary_for(tank.node_id)
+        if tank_uncovered or tank_air is None:
+            temps[tank.node_id] = t_in
+            flags[tank.node_id] = ["TANK", "NO_THERMAL_COVERAGE"]
+        else:
+            updated, tank_flags = step_tank_temperature(
+                temperature_c=temps.get(tank.node_id, source_temperature_c),
+                inflow_temperature_c=t_in,
+                inflow_m3s=inflow,
+                volume_m3=tank.volume_m3,
+                diameter_m=tank.diameter_m,
+                level_m=tank.level_m,
+                air_temperature_c=tank_air,
+                timestep_seconds=timestep_seconds,
+                calibration=calibration,
+                solar_irradiance_w_m2=solar_irradiance_w_m2,
+            )
+            temps[tank.node_id] = updated
+            flags[tank.node_id] = tank_flags
 
-    next_nodes = {
-        node_id: NodeThermal(
+    next_nodes: dict[str, NodeThermal] = {}
+    for node_id in network.node_kinds:
+        node_flags = list(flags.get(node_id, []))
+        boundary, uncovered = boundary_for(node_id)
+        if uncovered and "NO_THERMAL_COVERAGE" not in node_flags:
+            node_flags.append("NO_THERMAL_COVERAGE")
+        next_nodes[node_id] = NodeThermal(
             temperature_c=temps[node_id],
-            flags=flags.get(node_id, []),
+            flags=node_flags,
             boundary_temperature_c=(
-                soil if network.node_kinds.get(node_id) != KIND_RESERVOIR else None
+                None if network.node_kinds.get(node_id) == KIND_RESERVOIR else boundary
             ),
         )
-        for node_id in network.node_kinds
-    }
     return ThermalState(
         node_temperature_c=next_nodes,
         soil_temperature_c=soil,

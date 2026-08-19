@@ -2,6 +2,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from veinguard_sim.georeference.affine import (
+    aoi_bounds,
+    apply_affine,
+    load_aoi_polygon,
+    load_georeference_profile,
+)
+
 NODE_PREFIX = {
     "JUNCTION": "J",
     "RESERVOIR": "R",
@@ -29,7 +36,7 @@ def _coords(node: Any) -> tuple[float | None, float | None]:
         return None, None
 
 
-def normalize_topology(wn: Any) -> dict[str, Any]:
+def normalize_topology(wn: Any, georeference_profile_id: str | None = None) -> dict[str, Any]:
     node_kind: dict[str, str] = {}
     nodes: list[dict[str, Any]] = []
 
@@ -75,8 +82,37 @@ def normalize_topology(wn: Any) -> dict[str, Any]:
     add_links(list(wn.pump_name_list), "PUMP")
     add_links(list(wn.valve_name_list), "VALVE")
 
+    geo: dict[str, Any] = {"type": "NONE"}
+    if georeference_profile_id:
+        profile = load_georeference_profile(georeference_profile_id)
+        aoi = load_aoi_polygon(profile.aoi_profile_id)
+        dest = aoi_bounds(aoi)
+        indexed = [(i, n) for i, n in enumerate(nodes) if n["x"] is not None and n["y"] is not None]
+        transform, mapped = apply_affine(
+            [(float(n["x"]), float(n["y"])) for _, n in indexed],
+            profile,
+            dest,
+        )
+        for (i, _node), (lon, lat) in zip(indexed, mapped, strict=True):
+            nodes[i]["longitude"] = lon
+            nodes[i]["latitude"] = lat
+        geo = {
+            "type": transform.type,
+            "version": transform.version,
+            "algorithm": transform.algorithm,
+            "aoiProfileId": transform.aoi_profile_id,
+            "sourceBounds": transform.source_bounds,
+            "destBounds": transform.dest_bounds,
+            "scale": transform.scale,
+            "translateLon": transform.translate_lon,
+            "translateLat": transform.translate_lat,
+            "rotationDegrees": transform.rotation_degrees,
+            "insetFraction": transform.inset_fraction,
+            "samplingVersion": transform.sampling_version,
+        }
+
     return {
-        "geoReference": {"type": "NONE"},
+        "geoReference": geo,
         "nodes": nodes,
         "links": links,
     }

@@ -39,7 +39,7 @@ def validate_network(body: NetworkRequest, request: Request) -> dict[str, object
 def network_topology(body: NetworkRequest, request: Request) -> dict[str, object]:
     loaded = resolve_inp(body.network_id, body.inp_text)
     wn = load_network(loaded.inp_bytes)
-    topology = normalize_topology(wn)
+    topology = normalize_topology(wn, body.georeference_profile_id)
     return ok(
         {
             "networkId": loaded.network_id,

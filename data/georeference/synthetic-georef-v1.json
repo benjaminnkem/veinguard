@@ -1,0 +1,17 @@
+{
+  "id": "synthetic-georef-v1",
+  "name": "Uniform-scale centered affine placement",
+  "modelVersion": "synthetic-georef-v1",
+  "algorithm": "UNIFORM_SCALE_CENTERED_AFFINE",
+  "aoiProfileId": "demo-aoi-v1",
+  "insetFraction": 0.08,
+  "rotationDegrees": 0,
+  "preserveAspectRatio": true,
+  "sampling": {
+    "node": "COORDINATE",
+    "pipe": "MIDPOINT",
+    "longLinkSplitMeters": null,
+    "version": "asset-sample-v1"
+  },
+  "notes": "Places EPA Net3 drawing coordinates inside the demo AOI. EPANET lengths/hydraulics are unchanged. This does not claim Net3 is the real network of the destination city."
+}

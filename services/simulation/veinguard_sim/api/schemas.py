@@ -7,6 +7,7 @@ class NetworkRequest(BaseModel):
     network_id: str | None = Field(default=None, alias="networkId")
     inp_text: str | None = Field(default=None, alias="inpText")
     sample_time_seconds: float | None = Field(default=None, alias="sampleTimeSeconds")
+    georeference_profile_id: str | None = Field(default=None, alias="georeferenceProfileId")
 
     model_config = {"populate_by_name": True}
 

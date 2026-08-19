@@ -20,6 +20,7 @@ Authenticated with `Authorization: Bearer $SERVICE_TOKEN`. Health is public.
 | POST | `/v1/simulations/water-temperature` | one thermal timestep from hydraulics + air temperature |
 | POST | `/v1/simulations/free-chlorine` | first-order residual on EPANET hydraulics + modeled T |
 | POST | `/v1/simulations/monochloramine` | monochloramine residual + nitrification-conditions indicator |
+| POST | `/v1/simulations/baseline` | Net3 + synthetic georef + recorded FortyGuard + EPANET + T + chlorine |
 
 Body is exactly one of:
 
