@@ -1,0 +1,41 @@
+{
+  "id": "literature-water-temp-v1",
+  "name": "Literature water-temperature profile v1",
+  "source": "LITERATURE_REFERENCE",
+  "modelVersion": "water-temp-v1",
+  "validityRange": {
+    "waterTemperatureC": [0, 40],
+    "airTemperatureC": [-20, 55],
+    "pipeDiameterM": [0.02, 2.0],
+    "notes": "Lumped effective coefficients for a benchmark demo. Not a utility-calibrated profile."
+  },
+  "waterDensityKgM3": 998.0,
+  "waterSpecificHeatJKgK": 4182.0,
+  "pipeOverallHeatTransferWm2K": 8.0,
+  "stagnantFlowM3s": 1.0e-8,
+  "burialDepthM": 1.0,
+  "groundThermalDiffusivityM2s": 5.0e-7,
+  "tankOverallHeatTransferWm2K": 10.0,
+  "tankSolarAbsorptance": 0.6,
+  "references": [
+    {
+      "id": "blokker-2024",
+      "citation": "Blokker, Pan, van Laarhoven (2024). Validation of an Enhanced Drinking Water Temperature Model during Distribution. Water 16(19), 2796.",
+      "doi": "10.3390/w16192796"
+    },
+    {
+      "id": "blokker-2013",
+      "citation": "Blokker and Pieterse-Quirijns (2013). Modeling temperature in the drinking water distribution system. Journal AWWA 105(1).",
+      "doi": "10.5942/jawwa.2013.105.0011"
+    },
+    {
+      "id": "diaz-2023",
+      "citation": "Díaz, Boxall, Lamarche, González (2023). The impact of ground heat capacity on drinking water temperature. J. Water Resour. Plann. Manage. 149(5).",
+      "doi": "10.1061/JWRMD5.WRENG-5869"
+    },
+    {
+      "id": "kusuda-1965",
+      "citation": "Kusuda and Achenbach (1965). Earth temperature and thermal diffusivity at selected stations in the United States. ASHRAE Transactions 71(1)."
+    }
+  ]
+}

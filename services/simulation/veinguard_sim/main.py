@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from veinguard_sim import __version__
 from veinguard_sim.api.networks import router as networks_router
 from veinguard_sim.api.simulations import router as simulations_router
+from veinguard_sim.api.thermal import router as thermal_router
 from veinguard_sim.catalog import EPA_NET3_ID, catalog_networks
 from veinguard_sim.epanet.errors import SimulationError
 from veinguard_sim.http import correlation_id, error_response
@@ -120,3 +121,4 @@ def ready() -> dict[str, object]:
 
 app.include_router(networks_router)
 app.include_router(simulations_router)
+app.include_router(thermal_router)
