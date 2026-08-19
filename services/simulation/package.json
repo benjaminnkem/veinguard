@@ -1,0 +1,13 @@
+{
+  "name": "simulation",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "./.venv/bin/uvicorn veinguard_sim.main:app --reload --host 0.0.0.0 --port 8000",
+    "start": "./.venv/bin/uvicorn veinguard_sim.main:app --host 0.0.0.0 --port 8000",
+    "lint": "./.venv/bin/ruff check veinguard_sim tests",
+    "check-types": "./.venv/bin/mypy veinguard_sim",
+    "test": "./.venv/bin/pytest",
+    "build": "echo \"simulation python package — no JS build\""
+  }
+}
