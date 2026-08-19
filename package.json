@@ -16,6 +16,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,md,json,yml,yaml}\"",
     "setup:env": "bash scripts/bootstrap-env.sh",
     "setup:simulation": "bash scripts/setup-simulation.sh",
+    "seed:demo": "pnpm --filter api seed:demo",
     "bootstrap": "bash scripts/bootstrap-env.sh && docker compose up -d --wait && pnpm install && bash scripts/setup-simulation.sh"
   },
   "devDependencies": {

@@ -7,8 +7,11 @@ export interface ThermalStore {
   getCache(requestHash: string): Promise<CachedCompleted | null>;
   putCache(entry: CachedCompleted): Promise<void>;
   createAcquisition(doc: ThermalAcquisition): Promise<ThermalAcquisition>;
-  getAcquisition(id: string): Promise<ThermalAcquisition | null>;
-  findActiveByHashes(hashes: string[]): Promise<ThermalAcquisition | null>;
+  getAcquisition(id: string, organizationId?: string): Promise<ThermalAcquisition | null>;
+  findActiveByHashes(
+    hashes: string[],
+    organizationId?: string,
+  ): Promise<ThermalAcquisition | null>;
   replaceAcquisition(doc: ThermalAcquisition): Promise<void>;
 }
 
@@ -33,14 +36,30 @@ export class MemoryThermalStore implements ThermalStore {
     return doc;
   }
 
-  async getAcquisition(id: string): Promise<ThermalAcquisition | null> {
-    return this.acquisitions.get(id) ?? null;
+  async getAcquisition(
+    id: string,
+    organizationId?: string,
+  ): Promise<ThermalAcquisition | null> {
+    const found = this.acquisitions.get(id) ?? null;
+    if (!found) {
+      return null;
+    }
+    if (organizationId && found.organizationId !== organizationId) {
+      return null;
+    }
+    return found;
   }
 
-  async findActiveByHashes(hashes: string[]): Promise<ThermalAcquisition | null> {
+  async findActiveByHashes(
+    hashes: string[],
+    organizationId?: string,
+  ): Promise<ThermalAcquisition | null> {
     const set = new Set(hashes);
     for (const item of this.acquisitions.values()) {
       if (item.status === "FAILED" || item.status === "CANCELLED") {
+        continue;
+      }
+      if (organizationId && item.organizationId !== organizationId) {
         continue;
       }
       if (item.slices.some((slice) => set.has(slice.requestHash))) {
@@ -74,6 +93,7 @@ export class MongoThermalStore implements ThermalStore {
     await this.cacheCol().createIndex({ requestHash: 1 }, { unique: true });
     await this.acqCol().createIndex({ id: 1 }, { unique: true });
     await this.acqCol().createIndex({ "slices.requestHash": 1, status: 1 });
+    await this.acqCol().createIndex({ organizationId: 1, createdAt: -1 });
   }
 
   async getCache(requestHash: string): Promise<CachedCompleted | null> {
@@ -92,17 +112,31 @@ export class MongoThermalStore implements ThermalStore {
     return doc;
   }
 
-  async getAcquisition(id: string): Promise<ThermalAcquisition | null> {
-    const doc = await this.acqCol().findOne({ id });
+  async getAcquisition(
+    id: string,
+    organizationId?: string,
+  ): Promise<ThermalAcquisition | null> {
+    const filter: Record<string, unknown> = { id };
+    if (organizationId) {
+      filter.organizationId = organizationId;
+    }
+    const doc = await this.acqCol().findOne(filter);
     return doc ? stripMongoId(doc) : null;
   }
 
-  async findActiveByHashes(hashes: string[]): Promise<ThermalAcquisition | null> {
+  async findActiveByHashes(
+    hashes: string[],
+    organizationId?: string,
+  ): Promise<ThermalAcquisition | null> {
     const active: RunStatus[] = ["PENDING", "QUEUED", "RUNNING", "SUCCEEDED", "PARTIAL"];
-    const doc = await this.acqCol().findOne({
+    const filter: Record<string, unknown> = {
       "slices.requestHash": { $in: hashes },
       status: { $in: active },
-    });
+    };
+    if (organizationId) {
+      filter.organizationId = organizationId;
+    }
+    const doc = await this.acqCol().findOne(filter);
     return doc ? stripMongoId(doc) : null;
   }
 

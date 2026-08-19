@@ -122,6 +122,7 @@ export interface AcquisitionSliceState {
 
 export interface ThermalAcquisition {
   id: string;
+  organizationId?: string;
   status: RunStatus;
   mode: ProductMode;
   productRequest: ProductAcquisitionRequest;

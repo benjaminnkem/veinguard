@@ -61,6 +61,7 @@ export class FortyGuardProcessor extends WorkerHost {
       this.logger.warn(`Acquisition ${job.data.acquisitionId} was not found.`);
       return;
     }
+    await this.setJobStatus(acquisition.id, "RUNNING");
     try {
       const updated = await runAcquisitionSlice({
         acquisition,
@@ -88,6 +89,7 @@ export class FortyGuardProcessor extends WorkerHost {
                 timeoutMs: this.env.FORTYGUARD_ACTIVITY_TIMEOUT_MS,
               },
             });
+            await this.setJobStatus(summarized.id, "SUCCEEDED");
             return;
           } catch (error) {
             this.logger.warn(
@@ -96,6 +98,7 @@ export class FortyGuardProcessor extends WorkerHost {
           }
         }
         await store.replaceAcquisition(summarized);
+        await this.setJobStatus(summarized.id, summarized.status);
       }
     } catch (error) {
       const latest = await store.getAcquisition(acquisition.id);
@@ -109,6 +112,10 @@ export class FortyGuardProcessor extends WorkerHost {
         }
         latest.error = slice?.error;
         await store.replaceAcquisition(summarizeAcquisition(latest));
+        await this.setJobStatus(latest.id, "FAILED", {
+          code: error instanceof FortyGuardError ? error.errorCode : "THERMAL_ACTIVITY_FAILED",
+          message: error instanceof FortyGuardError ? error.message : "FortyGuard slice failed.",
+        });
       }
       if (
         error instanceof FortyGuardError &&
@@ -118,5 +125,29 @@ export class FortyGuardProcessor extends WorkerHost {
       }
       throw error;
     }
+  }
+
+  private async setJobStatus(
+    resourceId: string,
+    status: string,
+    error?: { code: string; message: string },
+  ): Promise<void> {
+    const now = new Date();
+    await this.mongo
+      .db(this.env.MONGODB_DB_NAME)
+      .collection("jobs")
+      .updateMany(
+        { resourceId },
+        {
+          $set: {
+            status,
+            updatedAt: now,
+            ...(status === "RUNNING" ? { startedAt: now } : {}),
+            ...(status === "SUCCEEDED" || status === "FAILED" ? { completedAt: now } : {}),
+            ...(error ? { error } : {}),
+          },
+          ...(status === "RUNNING" ? { $inc: { attempt: 1 } } : {}),
+        },
+      );
   }
 }

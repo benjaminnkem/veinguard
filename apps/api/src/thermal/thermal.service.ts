@@ -51,6 +51,7 @@ export class ThermalService implements OnModuleInit, OnModuleDestroy {
   async create(
     dto: CreateThermalAcquisitionDto,
     correlationId: string,
+    organizationId: string,
   ): Promise<{
     acquisition: ThermalAcquisition;
     queued: boolean;
@@ -68,7 +69,10 @@ export class ThermalService implements OnModuleInit, OnModuleDestroy {
       maxAoiSqMi: this.env.FORTYGUARD_MAX_AOI_SQ_MI,
     });
     const hashes = plan.slices.map((slice) => slice.requestHash);
-    const existing = await this.store.findActiveByHashes(hashes);
+    const existing = await this.store.findActiveByHashes(
+      hashes,
+      organizationId,
+    );
     if (existing && existing.status !== 'FAILED') {
       return { acquisition: existing, queued: existing.status !== 'SUCCEEDED' };
     }
@@ -90,6 +94,7 @@ export class ThermalService implements OnModuleInit, OnModuleDestroy {
     const allCached = slices.every((slice) => slice.snapshot);
     const acquisition: ThermalAcquisition = {
       id: newAcquisitionId(),
+      organizationId,
       status: allCached ? 'SUCCEEDED' : 'QUEUED',
       mode: product.mode,
       productRequest: product,
@@ -124,8 +129,11 @@ export class ThermalService implements OnModuleInit, OnModuleDestroy {
     return { acquisition, queued: !allCached };
   }
 
-  async get(id: string): Promise<ThermalAcquisition | null> {
-    return this.store.getAcquisition(id);
+  async get(
+    id: string,
+    organizationId: string,
+  ): Promise<ThermalAcquisition | null> {
+    return this.store.getAcquisition(id, organizationId);
   }
 }
 

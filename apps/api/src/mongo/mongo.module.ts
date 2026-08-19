@@ -1,0 +1,38 @@
+import { Global, Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import type { ApiEnv } from '@repo/config';
+import {
+  AuditLogSchema,
+  IdempotencySchema,
+  JobSchema,
+  MODEL_NAMES,
+  OrganizationSchema,
+  RefreshTokenSchema,
+  SimulationRunSchema,
+  UserSchema,
+} from '@repo/persistence';
+import { API_ENV } from '../config/env.module';
+
+@Global()
+@Module({
+  imports: [
+    MongooseModule.forRootAsync({
+      inject: [API_ENV],
+      useFactory: (env: ApiEnv) => ({
+        uri: env.MONGODB_URI,
+        dbName: env.MONGODB_DB_NAME,
+      }),
+    }),
+    MongooseModule.forFeature([
+      { name: MODEL_NAMES.Organization, schema: OrganizationSchema },
+      { name: MODEL_NAMES.User, schema: UserSchema },
+      { name: MODEL_NAMES.RefreshToken, schema: RefreshTokenSchema },
+      { name: MODEL_NAMES.Job, schema: JobSchema },
+      { name: MODEL_NAMES.Idempotency, schema: IdempotencySchema },
+      { name: MODEL_NAMES.AuditLog, schema: AuditLogSchema },
+      { name: MODEL_NAMES.SimulationRun, schema: SimulationRunSchema },
+    ]),
+  ],
+  exports: [MongooseModule],
+})
+export class MongoModule {}

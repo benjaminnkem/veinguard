@@ -1,9 +1,11 @@
 import { Controller, Get, Req, Res } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { Public } from '../auth/auth.guard';
 import { CORRELATION_HEADER, readCorrelationId } from '../common/correlation';
 import { fail, ok } from '../common/http';
 import { HealthService } from './health.service';
 
+@Public()
 @Controller('health')
 export class HealthController {
   constructor(private readonly health: HealthService) {}
