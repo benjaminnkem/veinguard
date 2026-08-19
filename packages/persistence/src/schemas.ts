@@ -124,6 +124,54 @@ export const SimulationRunSchema = new Schema(
 SimulationRunSchema.index({ organizationId: 1, createdAt: -1 });
 SimulationRunSchema.index({ status: 1, createdAt: -1 });
 
+export const AgentRunSchema = new Schema(
+  {
+    _id: { type: String, default: newId },
+    organizationId: { type: String, required: true, index: true },
+    status: { type: String, required: true, enum: RUN_STATUSES, index: true },
+    outcome: { type: String, default: null },
+    goal: { type: String, required: true },
+    structuredConstraints: { type: Schema.Types.Mixed, default: {} },
+    baselineRunId: { type: String, required: true, index: true },
+    modelId: { type: String, required: true },
+    compactBaseline: { type: Schema.Types.Mixed, default: null },
+    compactNetwork: { type: Schema.Types.Mixed, default: null },
+    selectedScenarioRunId: { type: String, default: null },
+    rationale: { type: String, default: null },
+    scenarioRunIds: { type: [String], default: [] },
+    correlationId: { type: String, required: true },
+    jobId: { type: String, default: null },
+    error: {
+      code: { type: String, default: null },
+      message: { type: String, default: null },
+    },
+    createdAt: { type: Date, default: Date.now, index: true },
+    updatedAt: { type: Date, default: Date.now },
+    startedAt: { type: Date, default: null },
+    completedAt: { type: Date, default: null },
+  },
+  { collection: "agentRuns", versionKey: false },
+);
+AgentRunSchema.index({ organizationId: 1, createdAt: -1 });
+
+export const AgentEventSchema = new Schema(
+  {
+    _id: { type: String, default: newId },
+    agentRunId: { type: String, required: true, index: true },
+    organizationId: { type: String, required: true, index: true },
+    sequence: { type: Number, required: true },
+    type: { type: String, required: true },
+    timestamp: { type: String, required: true },
+    displayMessage: { type: String, required: true },
+    toolName: { type: String, default: null },
+    scenarioRunId: { type: String, default: null },
+    argsHash: { type: String, default: null },
+    resultSummary: { type: Schema.Types.Mixed, default: null },
+  },
+  { collection: "agentEvents", versionKey: false },
+);
+AgentEventSchema.index({ agentRunId: 1, sequence: 1 }, { unique: true });
+
 export const MODEL_NAMES = {
   Organization: "Organization",
   User: "User",
@@ -132,4 +180,6 @@ export const MODEL_NAMES = {
   Idempotency: "Idempotency",
   AuditLog: "AuditLog",
   SimulationRun: "SimulationRun",
+  AgentRun: "AgentRun",
+  AgentEvent: "AgentEvent",
 } as const;

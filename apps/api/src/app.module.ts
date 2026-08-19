@@ -7,6 +7,7 @@ import { EnvModule } from './config/env.module';
 import { HealthModule } from './health/health.module';
 import { JobsModule } from './jobs/jobs.module';
 import { MongoModule } from './mongo/mongo.module';
+import { AgentModule } from './agent/agent.module';
 import { ThermalModule } from './thermal/thermal.module';
 
 @Module({
@@ -20,6 +21,7 @@ import { ThermalModule } from './thermal/thermal.module';
     JobsModule,
     HealthModule,
     ThermalModule,
+    AgentModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthGuard },

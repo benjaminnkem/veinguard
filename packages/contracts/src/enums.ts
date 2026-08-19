@@ -55,6 +55,39 @@ export type InterventionType = (typeof INTERVENTION_TYPES)[number];
 export const USER_ROLES = ["ADMIN", "OPERATOR", "VIEWER"] as const;
 export type UserRole = (typeof USER_ROLES)[number];
 
+export const AGENT_EVENT_TYPES = [
+  "STARTED",
+  "TOOL_STARTED",
+  "TOOL_COMPLETED",
+  "SCENARIO_CREATED",
+  "SCENARIO_REJECTED",
+  "COMPARISON_COMPLETED",
+  "COMPLETED",
+  "FAILED",
+  "LIMIT_REACHED",
+] as const;
+export type AgentEventType = (typeof AGENT_EVENT_TYPES)[number];
+
+export const AGENT_TOOL_NAMES = [
+  "get_zone_state",
+  "get_network_context",
+  "get_thermal_context",
+  "get_baseline_summary",
+  "simulate_scenario",
+  "get_scenario_result",
+  "compare_feasible_scenarios",
+] as const;
+export type AgentToolName = (typeof AGENT_TOOL_NAMES)[number];
+
+export const AGENT_OUTCOMES = [
+  "SELECTED",
+  "NO_FEASIBLE_SCENARIO",
+  "LIMIT_REACHED",
+  "REFUSED",
+  "FAILED",
+] as const;
+export type AgentOutcome = (typeof AGENT_OUTCOMES)[number];
+
 // BullMQ 5+ rejects ":" in queue names (it is the Redis key separator).
 // Namespace Redis keys with QUEUE_PREFIX instead.
 export const QUEUE_PREFIX = "veinguard";

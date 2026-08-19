@@ -2,6 +2,8 @@ import { Global, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import type { ApiEnv } from '@repo/config';
 import {
+  AgentEventSchema,
+  AgentRunSchema,
   AuditLogSchema,
   IdempotencySchema,
   JobSchema,
@@ -31,6 +33,8 @@ import { API_ENV } from '../config/env.module';
       { name: MODEL_NAMES.Idempotency, schema: IdempotencySchema },
       { name: MODEL_NAMES.AuditLog, schema: AuditLogSchema },
       { name: MODEL_NAMES.SimulationRun, schema: SimulationRunSchema },
+      { name: MODEL_NAMES.AgentRun, schema: AgentRunSchema },
+      { name: MODEL_NAMES.AgentEvent, schema: AgentEventSchema },
     ]),
   ],
   exports: [MongooseModule],

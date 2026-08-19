@@ -15,7 +15,10 @@ import { API_ENV } from '../config/env.module';
         },
       }),
     }),
-    BullModule.registerQueue({ name: QUEUE_NAMES.fortyguard }),
+    BullModule.registerQueue(
+      { name: QUEUE_NAMES.fortyguard },
+      { name: QUEUE_NAMES.agent },
+    ),
   ],
   exports: [BullModule],
 })
