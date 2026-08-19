@@ -18,7 +18,7 @@ Provider keys never belong in the browser. There is no mock FortyGuard, EPANET, 
 - Node.js 18+ (22 recommended)
 - pnpm 9
 - Docker Desktop
-- Python 3.11+ (3.12 recommended; 3.12 is used in CI)
+- Python 3.11–3.13 for the simulation service (3.12 in CI; WNTR is not tested on 3.14)
 - openssl (for local secret generation)
 
 ## Fresh clone

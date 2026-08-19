@@ -56,4 +56,4 @@ jobs:
         run: pytest
       - name: Docker image
         working-directory: ${{ github.workspace }}
-        run: docker build -t veinguard-simulation:ci services/simulation
+        run: docker build -f services/simulation/Dockerfile -t veinguard-simulation:ci .
