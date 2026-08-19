@@ -18,6 +18,7 @@ Authenticated with `Authorization: Bearer $SERVICE_TOKEN`. Health is public.
 | POST | `/v1/networks/topology` | normalized nodes/links |
 | POST | `/v1/simulations/hydraulics` | EPANET hydraulics + water age |
 | POST | `/v1/simulations/water-temperature` | one thermal timestep from hydraulics + air temperature |
+| POST | `/v1/simulations/free-chlorine` | first-order residual on EPANET hydraulics + modeled T |
 
 Body is exactly one of:
 

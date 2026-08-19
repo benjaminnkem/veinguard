@@ -1,0 +1,34 @@
+{
+  "id": "literature-free-chlorine-v1",
+  "name": "Literature free-chlorine profile v1",
+  "source": "LITERATURE_REFERENCE",
+  "modelVersion": "free-chlorine-v1",
+  "sourceResidualMgL": 1.0,
+  "operationalTargetMgL": 0.2,
+  "referenceTemperatureC": 20.0,
+  "bulkDecayPerDay": 0.5,
+  "theta": 1.05,
+  "temperatureModel": "VANTHOFF_THETA",
+  "wallDecay": 0.0,
+  "validityRange": {
+    "waterTemperatureC": [5, 35],
+    "residualMgL": [0, 5],
+    "notes": "Bulk-only first-order decay. Demo coefficients, not a utility hold-study fit."
+  },
+  "references": [
+    {
+      "id": "methodsx-2020",
+      "citation": "García-Ávila et al. (2020). Relationship between chlorine decay and temperature in the drinking water. MethodsX 7, 101002.",
+      "doi": "10.1016/j.mex.2020.101002"
+    },
+    {
+      "id": "epa-hold-study",
+      "citation": "U.S. EPA. Free Chlorine Distribution System Influent Hold Study Protocol.",
+      "url": "https://www.epa.gov/sdwa/free-chlorine-distribution-system-influent-hold-study-protocol"
+    },
+    {
+      "id": "powell-2000",
+      "citation": "Powell, West, Hallam, Forster, Simms (2000). Performance of various kinetic models for chlorine decay. J. Water Resour. Plann. Manage. 126(1)."
+    }
+  ]
+}
