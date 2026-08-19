@@ -1,0 +1,16 @@
+{
+  "id": "demo-objective-v1",
+  "name": "Demo deterministic objective v1",
+  "modelVersion": "objective-v1",
+  "source": "CONFIGURED",
+  "minimize": true,
+  "weights": {
+    "residualDeficitIntegral": 1.0,
+    "targetBreachCount": 10.0,
+    "flushWaterLiters": 0.001,
+    "chemicalIncrementMg": 0.01,
+    "energyDeltaKwh": 1.0,
+    "switchingComplexity": 1.0
+  },
+  "notes": "Lower is better. Weights are not selected by an LLM. Energy term is absolute pump-energy proxy unless a baseline energy is supplied."
+}

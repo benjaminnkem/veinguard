@@ -28,6 +28,14 @@ class Settings(BaseSettings):
         default="../../data/fixtures",
         alias="FIXTURE_DATA_DIR",
     )
+    constraints_data_dir: str = Field(
+        default="../../data/constraints",
+        alias="CONSTRAINTS_DATA_DIR",
+    )
+    objective_data_dir: str = Field(
+        default="../../data/objective",
+        alias="OBJECTIVE_DATA_DIR",
+    )
     max_concurrent_simulations: int = Field(default=1, alias="MAX_CONCURRENT_SIMULATIONS")
     simulation_timeout_seconds: int = Field(default=120, alias="SIMULATION_TIMEOUT_SECONDS")
     thermal_model_version: str = Field(default="water-temp-v1", alias="THERMAL_MODEL_VERSION")

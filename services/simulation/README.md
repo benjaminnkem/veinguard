@@ -21,6 +21,8 @@ Authenticated with `Authorization: Bearer $SERVICE_TOKEN`. Health is public.
 | POST | `/v1/simulations/free-chlorine` | first-order residual on EPANET hydraulics + modeled T |
 | POST | `/v1/simulations/monochloramine` | monochloramine residual + nitrification-conditions indicator |
 | POST | `/v1/simulations/baseline` | Net3 + synthetic georef + recorded FortyGuard + EPANET + T + chlorine |
+| POST | `/v1/simulations/scenario` | isolated typed interventions + constraints + objective |
+| POST | `/v1/simulations/scenarios/compare` | deterministic rank of feasible vs rejected |
 
 Body is exactly one of:
 

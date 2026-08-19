@@ -9,6 +9,7 @@ from veinguard_sim.api.baseline import router as baseline_router
 from veinguard_sim.api.chlorine import router as chlorine_router
 from veinguard_sim.api.monochloramine import router as monochloramine_router
 from veinguard_sim.api.networks import router as networks_router
+from veinguard_sim.api.scenarios import router as scenarios_router
 from veinguard_sim.api.simulations import router as simulations_router
 from veinguard_sim.api.thermal import router as thermal_router
 from veinguard_sim.catalog import EPA_NET3_ID, catalog_networks
@@ -131,3 +132,4 @@ app.include_router(thermal_router)
 app.include_router(chlorine_router)
 app.include_router(monochloramine_router)
 app.include_router(baseline_router)
+app.include_router(scenarios_router)

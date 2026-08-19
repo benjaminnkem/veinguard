@@ -1,0 +1,32 @@
+{
+  "id": "demo-constraints-v1",
+  "name": "Demo hard constraints v1",
+  "modelVersion": "constraints-v1",
+  "source": "OPERATIONAL_GUIDANCE",
+  "hard": [
+    {
+      "id": "simulation.converged",
+      "type": "CONVERGED",
+      "message": "EPANET simulation must converge."
+    },
+    {
+      "id": "pressure.min",
+      "type": "MIN_PRESSURE_M",
+      "limit": 0.0,
+      "units": "m",
+      "message": "Pressure fell below configured minimum."
+    },
+    {
+      "id": "pressure.max",
+      "type": "MAX_PRESSURE_M",
+      "limit": 120.0,
+      "units": "m",
+      "message": "Pressure exceeded configured maximum."
+    },
+    {
+      "id": "tank.level.bounds",
+      "type": "TANK_LEVEL_BOUNDS",
+      "message": "Tank level is outside min/max bounds."
+    }
+  ]
+}
