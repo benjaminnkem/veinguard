@@ -1,0 +1,38 @@
+export const ERROR_CODES = [
+  "AUTH_INVALID_CREDENTIALS",
+  "AUTH_FORBIDDEN",
+  "NETWORK_INVALID",
+  "NETWORK_VERSION_NOT_FOUND",
+  "THERMAL_PROVIDER_UNAVAILABLE",
+  "THERMAL_ACTIVITY_FAILED",
+  "THERMAL_NO_COVERAGE",
+  "THERMAL_REQUEST_INVALID",
+  "SIMULATION_CONVERGENCE_FAILED",
+  "SIMULATION_TIMEOUT",
+  "CHEMISTRY_CONFIG_INVALID",
+  "CHEMISTRY_MODEL_OUT_OF_RANGE",
+  "SCENARIO_INVALID_INTERVENTION",
+  "SCENARIO_HARD_CONSTRAINT_FAILED",
+  "AGENT_UNAVAILABLE",
+  "AGENT_LIMIT_REACHED",
+  "AGENT_NO_FEASIBLE_SCENARIO",
+  "INTERNAL_DEPENDENCY_UNAVAILABLE",
+  "VALIDATION_FAILED",
+] as const;
+
+export type ErrorCode = (typeof ERROR_CODES)[number];
+
+export interface ApiErrorBody {
+  error: {
+    code: ErrorCode;
+    message: string;
+    correlationId: string;
+  };
+}
+
+export interface ApiSuccessBody<T> {
+  data: T;
+  meta: {
+    correlationId: string;
+  };
+}
