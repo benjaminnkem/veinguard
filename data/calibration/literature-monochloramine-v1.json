@@ -1,0 +1,62 @@
+{
+  "id": "literature-monochloramine-v1",
+  "name": "Literature monochloramine profile v1",
+  "source": "LITERATURE_REFERENCE",
+  "modelVersion": "monochloramine-v1",
+  "sourceResidualMgL": 2.0,
+  "operationalTargetMgL": 1.5,
+  "phReference": 7.5,
+  "temperatureModel": "FIRST_ORDER_FROM_PUBLISHED_HALF_LIVES",
+  "halfLives": [
+    {
+      "temperatureC": 4.0,
+      "hours": 300,
+      "ph": 7.5,
+      "qualifier": "GREATER_THAN",
+      "notes": "Health Canada (2018) citing Vikesland et al. (2001): half-life of over 300 h at 4 °C, pH 7.5. V1 uses 300 h as a conservative implemented bound (slightly faster decay than 'over 300 h')."
+    },
+    {
+      "temperatureC": 35.0,
+      "hours": 75,
+      "ph": 7.5,
+      "qualifier": "REPORTED",
+      "notes": "Health Canada (2018) citing Vikesland et al. (2001): half-life decreases to 75 h at 35 °C, pH 7.5."
+    }
+  ],
+  "wallDecay": 0.0,
+  "freeAmmonia": {
+    "transport": "CONSERVATIVE",
+    "units": "mg-N/L",
+    "notes": "V1 does not apply an unverified free-ammonia rate modifier or autodecomposition yield. Ammonia is mixed and advected only."
+  },
+  "notImplemented": {
+    "roy2020SimplifiedChemicalModel": "Equations from Roy, Sathasivan, Kastl (2020) DOI 10.1016/j.scitotenv.2020.140410 were not retrieved in implementable form.",
+    "wntrBatchChloramineDecay": "WNTR library batch_chloramine_decay is a multi-species batch/pipe example with empty tank_reactions and no temperature dependence. Not a drop-in WDS model.",
+    "fullVikeslandJafvertValentineMsx": "Unified chloramine autodecomposition (HOCl/NH3/NH2Cl/NHCl2/carbonate) is not the V1 residual operator."
+  },
+  "validityRange": {
+    "waterTemperatureC": [4, 35],
+    "pH": [6.5, 9.0],
+    "residualMgL": [0, 5],
+    "freeAmmoniaMgNL": [0, 1],
+    "chlorineToNitrogenWeightRatio": [4.0, 5.5],
+    "notes": "Half-lives are reported at pH 7.5. Temperature outside 4–35 °C is an extrapolation of the two-point van 't Hoff fit. pH, Cl/N and alkalinity are validated configuration, not invented kinetic terms."
+  },
+  "references": [
+    {
+      "id": "vikesland-2001",
+      "citation": "Vikesland, Ozekin, Valentine (2001). Monochloramine Decay in Model and Distribution System Waters. Water Research 35(7), 1766–1776.",
+      "doi": "10.1016/S0043-1354(00)00406-1"
+    },
+    {
+      "id": "health-canada-chloramines-2018",
+      "citation": "Health Canada (2018). Chloramines in Drinking Water — Guideline Technical Document for Public Consultation. Reports Vikesland pH 7.5 half-lives: >300 h at 4 °C and 75 h at 35 °C.",
+      "url": "https://www.canada.ca/en/health-canada/programs/consultation-chloramines-drinking-water/document.html"
+    },
+    {
+      "id": "roy-2020",
+      "citation": "Roy, Sathasivan, Kastl (2020). Simplified chemical chloramine decay model for water distribution systems. Science of the Total Environment 741, 140410. Inspected as a primary source; coefficients were not implemented because implementable equations were not confirmed.",
+      "doi": "10.1016/j.scitotenv.2020.140410"
+    }
+  ]
+}

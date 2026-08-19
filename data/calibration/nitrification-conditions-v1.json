@@ -1,0 +1,66 @@
+{
+  "id": "nitrification-conditions-v1",
+  "name": "Nitrification conditions indicator v1",
+  "source": "OPERATIONAL_GUIDANCE",
+  "modelVersion": "nitrification-conditions-v1",
+  "notAProbabilityModel": true,
+  "notAMicrobialKineticsModel": true,
+  "labelWhenFavorable": "Conditions favorable for nitrification",
+  "labelWhenNotIndicated": "Nitrification-favorable conditions not indicated",
+  "thresholds": {
+    "highWaterAgeHours": {
+      "value": 48,
+      "driver": "HIGH_WATER_AGE",
+      "classification": "OPERATIONAL_GUIDANCE",
+      "notes": "TCEQ identifies high water age (dead-end mains, storage tanks, overlapping pressure planes) as where nitrification usually appears first, without a numeric hour cutoff. 48 h is a versioned operational planning horizon, not a regulatory limit."
+    },
+    "elevatedWaterTemperatureC": {
+      "value": 15,
+      "driver": "ELEVATED_WATER_TEMPERATURE",
+      "classification": "LITERATURE_REFERENCE",
+      "notes": "Nitrifier growth is reported as favorable between about 15 and 30 °C; activity slows below about 10 °C. Health Canada notes typical reported episodes at 20–25 °C. V1 uses the start of the favorable growth range."
+    },
+    "lowMonochloramineResidualMgL": {
+      "value": 1.5,
+      "driver": "LOW_MONOCHLORAMINE_RESIDUAL",
+      "classification": "OPERATIONAL_GUIDANCE",
+      "notes": "Health Canada, citing U.S. EPA (1999), Norton and LeChevallier (1997), and Skadsen and Cohen (2006): preferably greater than 1.5 mg/L monochloramine at all distribution monitoring points as a nitrification-prevention practice. Not a universal safe/unsafe residual."
+    },
+    "freeAmmoniaPresentMgNL": {
+      "value": 0.05,
+      "driver": "FREE_AMMONIA_PRESENT",
+      "units": "mg-N/L",
+      "classification": "OPERATIONAL_GUIDANCE",
+      "notes": "TCEQ: free ammonia leaving the plant should be less than 0.1 mg/L, preferably less than 0.05 mg/L. V1 treats ≥ 0.05 mg-N/L as free ammonia present at a level those sources treat as worth controlling."
+    }
+  },
+  "unusedDrivers": {
+    "DEPOSIT_OR_SEDIMENT_FACTOR": "Not emitted in V1. TCEQ notes sediment can harbor nitrifiers, but VeinGuard has no sediment/deposit field on the V1 network state."
+  },
+  "levelRules": {
+    "LOW": {"minDrivers": 0, "maxDrivers": 0},
+    "ELEVATED": {"minDrivers": 1, "maxDrivers": 2},
+    "HIGH": {"minDrivers": 3, "maxDrivers": 4}
+  },
+  "references": [
+    {
+      "id": "tceq-nitrification",
+      "citation": "Texas Commission on Environmental Quality. Controlling Nitrification in Public Water Systems with Chloramines.",
+      "url": "https://www.tceq.texas.gov/drinkingwater/disinfection/nitrification.html"
+    },
+    {
+      "id": "health-canada-chloramines-2018",
+      "citation": "Health Canada (2018). Chloramines in Drinking Water — Guideline Technical Document. Nitrification-prevention residual practice 2 mg/L leaving the plant and preferably >1.5 mg/L in distribution; typical reported episodes 20–25 °C.",
+      "url": "https://www.canada.ca/en/health-canada/programs/consultation-chloramines-drinking-water/document.html"
+    },
+    {
+      "id": "ijerph-2022-nitrification-review",
+      "citation": "Kirmeyer / distribution-system reviews compiled in Kulkarni et al. and related nitrification reviews: favorable nitrifier growth about 15–30 °C; slows below about 10 °C. Used as literature support for the 15 °C driver, not as a probability model.",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8997939/"
+    },
+    {
+      "id": "epa-1999-alternative-disinfectants",
+      "citation": "U.S. EPA (1999). Alternative Disinfectants and Oxidants Guidance Manual. Cited by Health Canada for the ≥1.5 mg/L distribution residual practice."
+    }
+  ]
+}

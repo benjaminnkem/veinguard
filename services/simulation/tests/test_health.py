@@ -17,6 +17,8 @@ def test_ready_does_not_require_token(client: TestClient) -> None:
     names = {check["name"] for check in body["data"]["checks"]}
     assert "wntr" in names
     assert "epa-net3" in names
+    assert body["data"]["monochloramineModelVersion"] == "monochloramine-v1"
+    assert body["data"]["nitrificationConditionsVersion"] == "nitrification-conditions-v1"
 
 
 def test_unknown_route_requires_token(client: TestClient) -> None:

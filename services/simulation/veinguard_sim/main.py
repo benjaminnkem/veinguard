@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 
 from veinguard_sim import __version__
 from veinguard_sim.api.chlorine import router as chlorine_router
+from veinguard_sim.api.monochloramine import router as monochloramine_router
 from veinguard_sim.api.networks import router as networks_router
 from veinguard_sim.api.simulations import router as simulations_router
 from veinguard_sim.api.thermal import router as thermal_router
@@ -115,6 +116,9 @@ def ready() -> dict[str, object]:
             "service": "veinguard-simulation",
             "checks": checks,
             "thermalModelVersion": settings.thermal_model_version,
+            "freeChlorineModelVersion": settings.free_chlorine_model_version,
+            "monochloramineModelVersion": settings.monochloramine_model_version,
+            "nitrificationConditionsVersion": settings.nitrification_risk_model_version,
         },
         "meta": {"version": __version__},
     }
@@ -124,3 +128,4 @@ app.include_router(networks_router)
 app.include_router(simulations_router)
 app.include_router(thermal_router)
 app.include_router(chlorine_router)
+app.include_router(monochloramine_router)
