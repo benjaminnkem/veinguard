@@ -11,4 +11,6 @@ Listens on `WORKER_HEALTH_PORT` (default 3002).
 - `GET /health/live`
 - `GET /health/ready`
 
-No domain processors run in Phase 01.
+Processors:
+
+- `fortyguard` — submit/poll FortyGuard activities; cache only Completed real responses
