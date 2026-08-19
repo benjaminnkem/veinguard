@@ -1,0 +1,12 @@
+node_modules
+dist
+.next
+coverage
+.turbo
+pnpm-lock.yaml
+.venv
+__pycache__
+.mypy_cache
+.pytest_cache
+.ruff_cache
+docs

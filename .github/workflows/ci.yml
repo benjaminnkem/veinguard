@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [dev, main]
+  pull_request:
+
+jobs:
+  js:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Format
+        run: pnpm format:check
+      - name: Lint
+        run: pnpm lint
+      - name: Types
+        run: pnpm check-types
+      - name: Test
+        run: pnpm test
+      - name: API e2e
+        run: pnpm --filter api test:e2e
+      - name: Build
+        run: pnpm build
+
+  python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/simulation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check veinguard_sim tests
+      - name: Types
+        run: mypy veinguard_sim
+      - name: Test
+        env:
+          SERVICE_TOKEN: test-simulation-token
+        run: pytest
+      - name: Docker image
+        working-directory: ${{ github.workspace }}
+        run: docker build -t veinguard-simulation:ci services/simulation

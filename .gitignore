@@ -1,9 +1,8 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # Dependencies
 node_modules
 .pnp
 .pnp.js
+.venv
 
 # Local env files
 .env
@@ -14,6 +13,11 @@ node_modules
 
 # Testing
 coverage
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.coverage
+htmlcov
 
 # Turbo
 .turbo
@@ -21,12 +25,18 @@ coverage
 # Vercel
 .vercel
 
-# Build Outputs
+# Build outputs
 .next/
 out/
 build
 dist
+*.tsbuildinfo
 
+# Python
+__pycache__
+*.py[cod]
+*.egg-info
+.Python
 
 # Debug
 npm-debug.log*
