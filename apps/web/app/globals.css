@@ -43,8 +43,7 @@ body {
   font-family: var(--font-sans);
 }
 
-.maplibregl-map,
-.maplibregl-canvas {
+.maplibregl-map {
   height: 100%;
   width: 100%;
 }

@@ -99,7 +99,7 @@ export function OperationsShell() {
     (quantQuery.error instanceof Error ? quantQuery.error.message : null);
 
   return (
-    <div className="flex h-dvh flex-col bg-background text-foreground">
+    <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-foreground">
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2">
         <div className="flex items-center gap-4">
           <p className="text-sm font-semibold tracking-tight">VeinGuard</p>
@@ -181,9 +181,9 @@ export function OperationsShell() {
       <StatusBar context={contextQuery.data ?? null} chemistry={chemistry} />
       <SummaryCards context={contextQuery.data ?? null} />
 
-      <div className="flex min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
         <aside
-          className={`${layersOpen ? "w-60" : "w-10"} hidden shrink-0 border-r border-border md:block`}
+          className={`${layersOpen ? "w-60" : "w-10"} hidden h-full shrink-0 overflow-auto border-r border-border md:block`}
         >
           <LayerPanel
             open={layersOpen}
@@ -207,7 +207,7 @@ export function OperationsShell() {
             groups={QUANT_LAYERS}
           />
         </aside>
-        <div className="relative min-w-0 flex-1">
+        <div className="relative min-h-0 min-w-0 flex-1">
           <OperationsMap
             quantLayer={visibleQuant}
             quantData={quantQuery.data?.geojson ?? EMPTY_COLLECTION}
@@ -223,7 +223,7 @@ export function OperationsShell() {
           ) : null}
         </div>
         <aside
-          className={`${inspectorOpen ? "w-80" : "w-10"} hidden shrink-0 border-l border-border lg:block`}
+          className={`${inspectorOpen ? "w-80" : "w-10"} hidden h-full shrink-0 overflow-auto border-l border-border lg:block`}
         >
           <Inspector
             open={inspectorOpen}

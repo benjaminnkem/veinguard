@@ -3,6 +3,7 @@
 import {
   Map as MapLibreMap,
   NavigationControl,
+  setWorkerUrl,
   type GeoJSONSource,
   type MapLayerMouseEvent,
 } from "maplibre-gl";
@@ -10,6 +11,10 @@ import { useEffect, useRef, useState } from "react";
 import { useMapStyle } from "@/lib/use-map-style";
 import type { OperationsLayer } from "@/lib/operations";
 import "maplibre-gl/dist/maplibre-gl.css";
+
+// Next.js Turbopack does not emit maplibre-gl-shared.mjs next to the worker.
+// Serve both files from /public/maplibre (see scripts/copy-maplibre-worker.mjs).
+setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
 
 interface OperationsMapProps {
   quantLayer: OperationsLayer;
@@ -33,169 +38,75 @@ export function OperationsMap({
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const onSelectRef = useRef(onSelect);
-  const { styleUrl, mounted } = useMapStyle();
+  const { styleUrl } = useMapStyle();
   const [ready, setReady] = useState(0);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
 
   useEffect(() => {
-    if (!mounted || !container.current || mapRef.current) {
+    const el = container.current;
+    if (!el) {
       return;
     }
-    const map = new MapLibreMap({
-      container: container.current,
-      style: styleUrl,
-      center: [-74.01, 40.711],
-      zoom: 14.4,
-    });
-    map.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
-    map.on("load", () => {
-      map.addSource("vg-tcm", { type: "geojson", data: EMPTY as never });
-      map.addSource("vg-quant-fill", { type: "geojson", data: EMPTY as never });
-      map.addSource("vg-quant-line", { type: "geojson", data: EMPTY as never });
-      map.addSource("vg-quant-point", { type: "geojson", data: EMPTY as never });
-      map.addSource("vg-network", { type: "geojson", data: EMPTY as never });
-      map.addSource("vg-assets", { type: "geojson", data: EMPTY as never });
-      map.addLayer({
-        id: "vg-tcm-fill",
-        type: "fill",
-        source: "vg-tcm",
-        paint: {
-          "fill-color": [
-            "interpolate",
-            ["linear"],
-            ["to-number", ["get", "average_temperature"], 0],
-            31.8,
-            "#fff4cc",
-            32.4,
-            "#f4a261",
-            33.2,
-            "#9b2226",
-          ],
-          "fill-opacity": 0.55,
-          "fill-outline-color": "#00000033",
-        },
+    let cancelled = false;
+    let map: MapLibreMap | null = null;
+
+    const createMap = (): MapLibreMap => {
+      setMapError(null);
+      const instance = new MapLibreMap({
+        container: el,
+        style: styleUrl,
+        center: [-74.01, 40.711],
+        zoom: 14.4,
       });
-      map.addLayer({
-        id: "vg-quant-fill",
-        type: "fill",
-        source: "vg-quant-fill",
-        layout: { visibility: "none" },
-        paint: { "fill-color": "#888", "fill-opacity": 0.4 },
+      mapRef.current = instance;
+      instance.addControl(
+        new NavigationControl({ showCompass: false }),
+        "bottom-right",
+      );
+      instance.on("error", (event) => {
+        const message =
+          event.error instanceof Error
+            ? event.error.message
+            : "Map failed to load the basemap style.";
+        setMapError(message);
       });
-      map.addLayer({
-        id: "vg-network-line",
-        type: "line",
-        source: "vg-network",
-        paint: {
-          "line-color": [
-            "match",
-            ["get", "type"],
-            "PUMP",
-            "#38bdf8",
-            "VALVE",
-            "#a78bfa",
-            "#94a3b8",
-          ],
-          "line-width": ["match", ["get", "type"], "PUMP", 3.5, 1.6],
-        },
+      instance.on("load", () => {
+        if (cancelled) {
+          return;
+        }
+        addOverlayLayers(instance, onSelectRef);
+        instance.resize();
+        setReady((value) => value + 1);
       });
-      map.addLayer({
-        id: "vg-quant-line",
-        type: "line",
-        source: "vg-quant-line",
-        layout: { visibility: "none" },
-        paint: {
-          "line-width": 2.4,
-          "line-color": [
-            "interpolate",
-            ["linear"],
-            ["abs", ["to-number", ["get", "flowM3s"], 0]],
-            0,
-            "#94a3b8",
-            0.2,
-            "#0ea5e9",
-            0.8,
-            "#1d4ed8",
-          ],
-        },
-      });
-      map.addLayer({
-        id: "vg-quant-point",
-        type: "circle",
-        source: "vg-quant-point",
-        layout: { visibility: "none" },
-        paint: {
-          "circle-radius": 6,
-          "circle-stroke-width": 1,
-          "circle-stroke-color": "#0b0f14",
-          "circle-color": "#64748b",
-        },
-      });
-      map.addLayer({
-        id: "vg-assets",
-        type: "circle",
-        source: "vg-assets",
-        paint: {
-          "circle-radius": [
-            "match",
-            ["get", "type"],
-            "TANK",
-            7,
-            "RESERVOIR",
-            7,
-            "JUNCTION",
-            3.5,
-            5,
-          ],
-          "circle-color": [
-            "match",
-            ["get", "type"],
-            "TANK",
-            "#22c55e",
-            "RESERVOIR",
-            "#38bdf8",
-            "JUNCTION",
-            "#e2e8f0",
-            "#fbbf24",
-          ],
-          "circle-stroke-width": 1.2,
-          "circle-stroke-color": "#0f172a",
-        },
-      });
-      const clickLayers = [
-        "vg-assets",
-        "vg-quant-point",
-        "vg-network-line",
-        "vg-quant-line",
-        "vg-tcm-fill",
-      ];
-      for (const layerId of clickLayers) {
-        map.on("click", layerId, (event: MapLayerMouseEvent) => {
-          const id = String(
-            event.features?.[0]?.properties?.id ?? event.features?.[0]?.id ?? "",
-          );
-          if (id) {
-            onSelectRef.current(id);
-          }
-        });
-        map.on("mouseenter", layerId, () => {
-          map.getCanvas().style.cursor = "pointer";
-        });
-        map.on("mouseleave", layerId, () => {
-          map.getCanvas().style.cursor = "";
-        });
+      return instance;
+    };
+
+    const observer = new ResizeObserver(() => {
+      if (cancelled) {
+        return;
       }
-      setReady((value) => value + 1);
+      if (!map && el.clientWidth > 0 && el.clientHeight > 0) {
+        map = createMap();
+        return;
+      }
+      map?.resize();
     });
-    mapRef.current = map;
+
+    observer.observe(el);
+    if (el.clientWidth > 0 && el.clientHeight > 0) {
+      map = createMap();
+    }
     return () => {
-      map.remove();
+      cancelled = true;
+      observer.disconnect();
+      map?.remove();
       mapRef.current = null;
     };
-  }, [mounted, styleUrl]);
+  }, [styleUrl]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -273,11 +184,166 @@ export function OperationsMap({
   }, [selectedId, ready]);
 
   return (
-    <div className="relative h-full min-h-[280px] w-full">
-      <div ref={container} className="h-full w-full" role="application" aria-label="Operations map" />
+    <div className="absolute inset-0 min-h-[320px] bg-slate-900">
+      <div
+        ref={container}
+        className="absolute inset-0"
+        role="application"
+        aria-label="Operations map"
+      />
+      {mapError ? (
+        <p
+          role="alert"
+          className="absolute left-3 top-3 z-10 max-w-sm rounded-md bg-card/95 px-3 py-2 text-xs"
+        >
+          Map failed: {mapError}
+        </p>
+      ) : null}
       <Legend layer={quantLayer} />
     </div>
   );
+}
+
+function addOverlayLayers(
+  map: MapLibreMap,
+  onSelectRef: { current: (id: string) => void },
+): void {
+  map.addSource("vg-tcm", { type: "geojson", data: EMPTY as never });
+  map.addSource("vg-quant-fill", { type: "geojson", data: EMPTY as never });
+  map.addSource("vg-quant-line", { type: "geojson", data: EMPTY as never });
+  map.addSource("vg-quant-point", { type: "geojson", data: EMPTY as never });
+  map.addSource("vg-network", { type: "geojson", data: EMPTY as never });
+  map.addSource("vg-assets", { type: "geojson", data: EMPTY as never });
+  map.addLayer({
+    id: "vg-tcm-fill",
+    type: "fill",
+    source: "vg-tcm",
+    paint: {
+      "fill-color": [
+        "interpolate",
+        ["linear"],
+        ["to-number", ["get", "average_temperature"], 0],
+        31.8,
+        "#fff4cc",
+        32.4,
+        "#f4a261",
+        33.2,
+        "#9b2226",
+      ],
+      "fill-opacity": 0.55,
+      "fill-outline-color": "#00000033",
+    },
+  });
+  map.addLayer({
+    id: "vg-quant-fill",
+    type: "fill",
+    source: "vg-quant-fill",
+    layout: { visibility: "none" },
+    paint: { "fill-color": "#888", "fill-opacity": 0.4 },
+  });
+  map.addLayer({
+    id: "vg-network-line",
+    type: "line",
+    source: "vg-network",
+    paint: {
+      "line-color": [
+        "match",
+        ["get", "type"],
+        "PUMP",
+        "#38bdf8",
+        "VALVE",
+        "#a78bfa",
+        "#94a3b8",
+      ],
+      "line-width": ["match", ["get", "type"], "PUMP", 3.5, 1.6],
+    },
+  });
+  map.addLayer({
+    id: "vg-quant-line",
+    type: "line",
+    source: "vg-quant-line",
+    layout: { visibility: "none" },
+    paint: {
+      "line-width": 2.4,
+      "line-color": [
+        "interpolate",
+        ["linear"],
+        ["abs", ["to-number", ["get", "flowM3s"], 0]],
+        0,
+        "#94a3b8",
+        0.2,
+        "#0ea5e9",
+        0.8,
+        "#1d4ed8",
+      ],
+    },
+  });
+  map.addLayer({
+    id: "vg-quant-point",
+    type: "circle",
+    source: "vg-quant-point",
+    layout: { visibility: "none" },
+    paint: {
+      "circle-radius": 6,
+      "circle-stroke-width": 1,
+      "circle-stroke-color": "#0b0f14",
+      "circle-color": "#64748b",
+    },
+  });
+  map.addLayer({
+    id: "vg-assets",
+    type: "circle",
+    source: "vg-assets",
+    paint: {
+      "circle-radius": [
+        "match",
+        ["get", "type"],
+        "TANK",
+        7,
+        "RESERVOIR",
+        7,
+        "JUNCTION",
+        3.5,
+        5,
+      ],
+      "circle-color": [
+        "match",
+        ["get", "type"],
+        "TANK",
+        "#22c55e",
+        "RESERVOIR",
+        "#38bdf8",
+        "JUNCTION",
+        "#e2e8f0",
+        "#fbbf24",
+      ],
+      "circle-stroke-width": 1.2,
+      "circle-stroke-color": "#0f172a",
+    },
+  });
+  const clickLayers = [
+    "vg-assets",
+    "vg-quant-point",
+    "vg-network-line",
+    "vg-quant-line",
+    "vg-tcm-fill",
+  ];
+  for (const layerId of clickLayers) {
+    map.on("click", layerId, (event: MapLayerMouseEvent) => {
+      const id = String(
+        event.features?.[0]?.properties?.id ?? event.features?.[0]?.id ?? "",
+      );
+      if (id) {
+        onSelectRef.current(id);
+      }
+    });
+    map.on("mouseenter", layerId, () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", layerId, () => {
+      map.getCanvas().style.cursor = "";
+    });
+  }
 }
 
 function setLayerVisibility(

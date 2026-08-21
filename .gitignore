@@ -32,6 +32,9 @@ build
 dist
 *.tsbuildinfo
 
+# Copied MapLibre v6 worker assets (see apps/web/scripts/copy-maplibre-worker.mjs)
+apps/web/public/maplibre/
+
 # Python
 __pycache__
 *.py[cod]
