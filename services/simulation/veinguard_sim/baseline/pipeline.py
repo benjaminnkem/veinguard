@@ -298,6 +298,7 @@ def run_baseline(
             ],
         },
         "nodes": nodes_out,
+        "links": _links_out(topology["links"], nodes_out, hydraulics),
         "uncoveredLinkIds": [
             str(link["id"])
             for link in topology["links"]
@@ -344,3 +345,41 @@ def run_baseline(
             ]
         ),
     }
+
+
+def _links_out(
+    topology_links: list[dict[str, Any]],
+    nodes_out: dict[str, dict[str, Any]],
+    hydraulics: Any,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for link in topology_links:
+        start = nodes_out.get(str(link["fromNodeId"]))
+        end = nodes_out.get(str(link["toNodeId"]))
+        hyd = hydraulics.links.get(str(link["sourceId"]), {})
+        coords = None
+        if (
+            start
+            and end
+            and start.get("longitude") is not None
+            and start.get("latitude") is not None
+            and end.get("longitude") is not None
+            and end.get("latitude") is not None
+        ):
+            coords = [
+                [float(start["longitude"]), float(start["latitude"])],
+                [float(end["longitude"]), float(end["latitude"])],
+            ]
+        rows.append(
+            {
+                "id": str(link["id"]),
+                "sourceId": str(link["sourceId"]),
+                "type": str(link["type"]),
+                "fromNodeId": str(link["fromNodeId"]),
+                "toNodeId": str(link["toNodeId"]),
+                "flowM3s": hyd.get("flowM3s"),
+                "velocityMs": hyd.get("velocityMs"),
+                "coordinates": coords,
+            }
+        )
+    return rows

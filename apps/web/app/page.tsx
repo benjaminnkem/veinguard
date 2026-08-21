@@ -1,9 +1,5 @@
-import { FoundationPanel } from "@/components/foundation-panel";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center px-6 py-16">
-      <FoundationPanel />
-    </main>
-  );
+  redirect("/operations");
 }

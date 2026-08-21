@@ -42,3 +42,9 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+.maplibregl-map,
+.maplibregl-canvas {
+  height: 100%;
+  width: 100%;
+}

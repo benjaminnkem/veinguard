@@ -9,6 +9,7 @@ from veinguard_sim.baseline.pipeline import run_baseline
 from veinguard_sim.catalog import EPA_NET3_ID
 from veinguard_sim.epanet.errors import NetworkInvalidError
 from veinguard_sim.http import ok
+from veinguard_sim.operations.snapshot import build_operations_snapshot
 
 router = APIRouter(prefix="/v1/simulations")
 
@@ -54,6 +55,30 @@ def baseline(body: BaselineRequest, request: Request) -> dict[str, object]:
             operational_target_mg_l=body.operational_target_mg_l,
             chemistry_profile_id=body.chemistry_profile_id,
             thermal_profile_id=body.thermal_profile_id,
+        )
+    except (FileNotFoundError, ValueError) as exc:
+        raise NetworkInvalidError(str(exc)) from exc
+    return ok(result, request)
+
+
+class OperationsSnapshotRequest(BaseModel):
+    network_id: str = Field(default=EPA_NET3_ID, alias="networkId")
+    fixture_id: str = Field(
+        default="heatmap-2024-07-15T14-demo-aoi-v1", alias="fixtureId"
+    )
+    sample_time_seconds: float | None = Field(default=3600, alias="sampleTimeSeconds")
+    include_monochloramine: bool = Field(default=True, alias="includeMonochloramine")
+    model_config = {"populate_by_name": True}
+
+
+@router.post("/operations-snapshot")
+def operations_snapshot(body: OperationsSnapshotRequest, request: Request) -> dict[str, object]:
+    try:
+        result = build_operations_snapshot(
+            network_id=body.network_id,
+            fixture_id=body.fixture_id,
+            sample_time_seconds=body.sample_time_seconds or 3600.0,
+            include_monochloramine=body.include_monochloramine,
         )
     except (FileNotFoundError, ValueError) as exc:
         raise NetworkInvalidError(str(exc)) from exc

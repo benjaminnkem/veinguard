@@ -48,6 +48,8 @@ def test_baseline_net3_with_recorded_fortyguard() -> None:
     node = next(iter(result["nodes"].values()))
     assert node["x"] is not None
     assert node["longitude"] is not None
+    assert result["links"]
+    assert result["links"][0]["coordinates"] is not None
     covered = [
         item
         for item in result["nodes"].values()

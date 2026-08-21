@@ -1,5 +1,6 @@
 "use client";
 
+import { useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 
 const OPTIONS = [
@@ -8,10 +9,17 @@ const OPTIONS = [
   { value: "system", label: "System" },
 ] as const;
 
+const emptySubscribe = () => () => undefined;
+
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
 
-  if (theme == null) {
+  if (!mounted) {
     return (
       <div className="inline-flex rounded-lg border border-border bg-card p-1" aria-hidden="true">
         <span className="px-3 py-1.5 text-xs text-muted-foreground">Theme</span>
