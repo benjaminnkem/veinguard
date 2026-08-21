@@ -8,6 +8,7 @@ import { HealthModule } from './health/health.module';
 import { JobsModule } from './jobs/jobs.module';
 import { MongoModule } from './mongo/mongo.module';
 import { AgentModule } from './agent/agent.module';
+import { LabModule } from './lab/lab.module';
 import { OperationsModule } from './operations/operations.module';
 import { ThermalModule } from './thermal/thermal.module';
 
@@ -23,6 +24,7 @@ import { ThermalModule } from './thermal/thermal.module';
     HealthModule,
     ThermalModule,
     AgentModule,
+    LabModule,
     OperationsModule,
   ],
   providers: [

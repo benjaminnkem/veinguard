@@ -84,6 +84,25 @@ export interface ScenarioResult {
     converged: boolean;
     summary?: Record<string, number | null | undefined>;
   };
+  networkState?: {
+    nodes: Array<{
+      id: string;
+      sourceId?: string;
+      type?: string;
+      pressureM?: number | null;
+      waterAgeHours?: number | null;
+      residualMgL?: number | null;
+      projectedTargetBreach?: boolean;
+    }>;
+    links?: Array<{
+      id: string;
+      sourceId?: string;
+      type?: string;
+      flowM3s?: number | null;
+      velocityMs?: number | null;
+    }>;
+    operationalTargetMgL?: number;
+  };
 }
 
 export interface ComparisonResult {

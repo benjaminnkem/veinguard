@@ -5,12 +5,7 @@ import Link from "next/link";
 const ITEMS = [
   { href: "/operations", id: "operations", label: "Operations" },
   { href: "/digital-twin", id: "twin", label: "Digital Twin" },
-  {
-    href: null,
-    id: "lab",
-    label: "Intervention Lab",
-    title: "Intervention Lab ships in a later phase",
-  },
+  { href: "/intervention-lab", id: "lab", label: "Intervention Lab" },
   {
     href: null,
     id: "resilience",

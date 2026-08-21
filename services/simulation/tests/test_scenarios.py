@@ -94,6 +94,8 @@ def test_feasible_pump_setting() -> None:
     assert result["hydraulics"]["converged"] is True
     assert result["feasible"] is True
     assert isinstance(result["objective"], float)
+    assert result["networkState"]["nodes"]
+    assert any(node["id"] == "J-10" for node in result["networkState"]["nodes"])
 
 
 def test_closed_pumps_fail_min_pressure() -> None:

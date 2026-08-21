@@ -27,6 +27,8 @@ export class HttpSimulationClient implements SimulationPort {
     interventions: unknown[];
     sampleTimeSeconds?: number;
     scenarioRunId?: string;
+    airTemperatureC?: number;
+    sourceTemperatureC?: number;
   }): Promise<ScenarioResult> {
     const payload = await this.request("/v1/simulations/scenario", {
       networkId: input.networkId,
@@ -34,6 +36,8 @@ export class HttpSimulationClient implements SimulationPort {
       interventions: input.interventions,
       sampleTimeSeconds: input.sampleTimeSeconds ?? 18000,
       scenarioRunId: input.scenarioRunId,
+      airTemperatureC: input.airTemperatureC,
+      sourceTemperatureC: input.sourceTemperatureC,
     });
     return normalizeScenario(payload, input.scenarioRunId);
   }
@@ -112,5 +116,6 @@ function normalizeScenario(payload: Record<string, unknown>, fallbackId?: string
       })),
     metrics: (payload.metrics as ScenarioResult["metrics"]) ?? undefined,
     hydraulics: (payload.hydraulics as ScenarioResult["hydraulics"]) ?? undefined,
+    networkState: (payload.networkState as ScenarioResult["networkState"]) ?? undefined,
   };
 }

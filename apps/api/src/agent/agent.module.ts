@@ -8,5 +8,6 @@ import { AgentService } from './agent.service';
   imports: [QueuesModule, JobsModule],
   controllers: [AgentController],
   providers: [AgentService],
+  exports: [AgentService],
 })
 export class AgentModule {}

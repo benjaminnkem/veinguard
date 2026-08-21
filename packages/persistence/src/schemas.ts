@@ -172,6 +172,47 @@ export const AgentEventSchema = new Schema(
 );
 AgentEventSchema.index({ agentRunId: 1, sequence: 1 }, { unique: true });
 
+export const ScenarioSchema = new Schema(
+  {
+    _id: { type: String, default: newId },
+    organizationId: { type: String, required: true, index: true },
+    name: { type: String, required: true },
+    baselineRunId: { type: String, required: true, index: true },
+    parentId: { type: String, default: null },
+    status: { type: String, required: true, enum: RUN_STATUSES, index: true },
+    interventions: { type: [Schema.Types.Mixed], default: [] },
+    horizonStart: { type: String, required: true },
+    sampleTimeSeconds: { type: Number, required: true },
+    networkId: { type: String, required: true },
+    airTemperatureC: { type: Number, default: 20 },
+    sourceTemperatureC: { type: Number, default: 15 },
+    result: { type: Schema.Types.Mixed, default: null },
+    appliedToTwin: { type: Boolean, default: false },
+    appliedAt: { type: Date, default: null },
+    correlationId: { type: String, required: true },
+    jobId: { type: String, default: null },
+    agentRunId: { type: String, default: null },
+    error: {
+      code: { type: String, default: null },
+      message: { type: String, default: null },
+    },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+  },
+  { collection: "scenarios", versionKey: false },
+);
+ScenarioSchema.index({ organizationId: 1, createdAt: -1 });
+
+export const LabStateSchema = new Schema(
+  {
+    _id: { type: String },
+    organizationId: { type: String, required: true, unique: true },
+    appliedScenarioId: { type: String, default: null },
+    updatedAt: { type: Date, default: Date.now },
+  },
+  { collection: "labState", versionKey: false },
+);
+
 export const MODEL_NAMES = {
   Organization: "Organization",
   User: "User",
@@ -182,4 +223,6 @@ export const MODEL_NAMES = {
   SimulationRun: "SimulationRun",
   AgentRun: "AgentRun",
   AgentEvent: "AgentEvent",
+  Scenario: "Scenario",
+  LabState: "LabState",
 } as const;

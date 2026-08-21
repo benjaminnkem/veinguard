@@ -173,6 +173,7 @@ def run_scenario(
             },
         },
         "baseNetworkImmutable": True,
+        "networkState": _network_state(isolated, hydraulics, chemistry, target),
         "provenance": {
             "constraintsProfileId": constraints_profile.profile_id,
             "objectiveProfileId": objective_profile.profile_id,
@@ -184,6 +185,49 @@ def run_scenario(
             },
         },
     }
+
+
+def _network_state(wn: Any, hydraulics: Any, chemistry: Any, target: float) -> dict[str, Any]:
+    nodes: list[dict[str, Any]] = []
+    for kind, names in (
+        ("JUNCTION", wn.junction_name_list),
+        ("RESERVOIR", wn.reservoir_name_list),
+        ("TANK", wn.tank_name_list),
+    ):
+        for source_id in names:
+            node_id = prefixed_id(kind, source_id)
+            hyd = hydraulics.nodes.get(source_id, {})
+            chem = chemistry.nodes.get(node_id)
+            residual = chem.residual_mg_l if chem is not None else None
+            nodes.append(
+                {
+                    "id": node_id,
+                    "sourceId": source_id,
+                    "type": kind,
+                    "pressureM": hyd.get("pressureM"),
+                    "waterAgeHours": hyd.get("waterAgeHours"),
+                    "residualMgL": residual,
+                    "projectedTargetBreach": bool(chem.target_breach) if chem is not None else False,
+                }
+            )
+    links: list[dict[str, Any]] = []
+    for kind, names in (
+        ("PIPE", wn.pipe_name_list),
+        ("PUMP", wn.pump_name_list),
+        ("VALVE", wn.valve_name_list),
+    ):
+        for source_id in names:
+            hyd = hydraulics.links.get(source_id, {})
+            links.append(
+                {
+                    "id": prefixed_id(kind, source_id),
+                    "sourceId": source_id,
+                    "type": kind,
+                    "flowM3s": hyd.get("flowM3s"),
+                    "velocityMs": hyd.get("velocityMs"),
+                }
+            )
+    return {"nodes": nodes, "links": links, "operationalTargetMgL": target}
 
 
 def _wn_to_bytes(wn: Any) -> bytes:

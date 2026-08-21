@@ -131,14 +131,12 @@ export function Inspector({
                 Open in Digital Twin
               </button>
             )}
-            <button
-              type="button"
-              disabled
-              className="rounded border border-border px-2 py-1 text-left text-muted-foreground"
-              title="Scenarios ship in Intervention Lab"
+            <Link
+              href="/intervention-lab"
+              className="rounded border border-border px-2 py-1 text-left"
             >
               Create scenario
-            </button>
+            </Link>
             <button
               type="button"
               className="rounded border border-border px-2 py-1 text-left"

@@ -11,6 +11,7 @@ import { ProvenanceDrawer } from "@/components/operations/provenance-drawer";
 import { StatusBar } from "@/components/operations/status-bar";
 import { Timeline } from "@/components/operations/timeline";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { fetchApplied, labKeys } from "@/lib/lab";
 import {
   fetchAsset,
   fetchContext,
@@ -20,6 +21,7 @@ import {
   operationsKeys,
   type ChemistryId,
   type TwinColorBy,
+  type TwinGraph,
 } from "@/lib/operations";
 
 const TwinFlow = dynamic(
@@ -57,7 +59,9 @@ export function TwinShell() {
   const [traceDirection, setTraceDirection] = useState<
     "upstream" | "downstream" | null
   >(null);
-  const [preview, setPreview] = useState<"before" | "after">("before");
+  const [preview, setPreview] = useState<"before" | "after">(
+    params.get("preview") === "after" ? "after" : "before",
+  );
   const [provenanceOpen, setProvenanceOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(true);
   const [legendOpen, setLegendOpen] = useState(true);
@@ -99,8 +103,15 @@ export function TwinShell() {
     queryFn: fetchProvenance,
     enabled: provenanceOpen,
   });
+  const appliedQuery = useQuery({
+    queryKey: labKeys.applied(),
+    queryFn: fetchApplied,
+  });
 
-  const graph = twinQuery.data ?? null;
+  const graph = overlayAfter(
+    twinQuery.data ?? null,
+    preview === "after" ? appliedQuery.data?.scenario?.networkState ?? null : null,
+  );
   const trace = traceDirection ? (traceQuery.data ?? null) : null;
 
   return (
@@ -233,9 +244,9 @@ export function TwinShell() {
               role="status"
               className="absolute left-3 right-3 top-3 z-10 rounded-md border border-border bg-card/95 px-3 py-2 text-xs shadow"
             >
-              After-state is unavailable. No completed scenario simulation exists.
-              The schematic still shows the captured baseline run. VeinGuard does
-              not invent scenario results.
+              {appliedQuery.data?.afterAvailable
+                ? `${appliedQuery.data.heatNotice} After-state is the completed scenario applied to the digital twin. Decision-support simulation. No real infrastructure was actuated.`
+                : "After-state is unavailable. No completed scenario simulation has been applied. The schematic still shows the captured baseline. VeinGuard does not invent scenario results."}
             </div>
           ) : null}
         </div>
@@ -400,4 +411,50 @@ function LegendPanel({
       </section>
     </div>
   );
+}
+
+function overlayAfter(
+  graph: TwinGraph | null,
+  networkState: {
+    nodes?: Array<{
+      id: string;
+      residualMgL?: number | null;
+      pressureM?: number | null;
+      waterAgeHours?: number | null;
+      projectedTargetBreach?: boolean;
+    }>;
+    links?: Array<{ id: string; flowM3s?: number | null }>;
+  } | null,
+): TwinGraph | null {
+  if (!graph || !networkState?.nodes) {
+    return graph;
+  }
+  const byId = new Map(networkState.nodes.map((node) => [node.id, node]));
+  const linkById = new Map(
+    (networkState.links ?? []).map((link) => [link.id, link]),
+  );
+  return {
+    ...graph,
+    nodes: graph.nodes.map((node) => {
+      const next = byId.get(node.id);
+      if (!next) {
+        return node;
+      }
+      return {
+        ...node,
+        residualMgL: next.residualMgL ?? node.residualMgL,
+        pressureM: next.pressureM ?? node.pressureM,
+        waterAgeHours: next.waterAgeHours ?? node.waterAgeHours,
+        projectedTargetBreach:
+          next.projectedTargetBreach ?? node.projectedTargetBreach,
+      };
+    }),
+    edges: graph.edges.map((edge) => {
+      const next = linkById.get(edge.id);
+      if (!next) {
+        return edge;
+      }
+      return { ...edge, flowM3s: next.flowM3s ?? edge.flowM3s };
+    }),
+  };
 }
