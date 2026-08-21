@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { AssetDetail } from "@/lib/operations";
 
 interface InspectorProps {
@@ -7,6 +8,7 @@ interface InspectorProps {
   onToggle: () => void;
   detail: AssetDetail | null;
   onProvenance: () => void;
+  twinHref?: string | null;
 }
 
 export function Inspector({
@@ -14,6 +16,7 @@ export function Inspector({
   onToggle,
   detail,
   onProvenance,
+  twinHref,
 }: InspectorProps) {
   if (!open) {
     return (
@@ -111,14 +114,23 @@ export function Inspector({
             )}
           </section>
           <div className="flex flex-col gap-1 pt-2">
-            <button
-              type="button"
-              disabled
-              className="rounded border border-border px-2 py-1 text-left text-muted-foreground"
-              title="Digital Twin ships in a later phase"
-            >
-              Open in Digital Twin
-            </button>
+            {twinHref === null ? null : twinHref ? (
+              <Link
+                href={twinHref}
+                className="rounded border border-border px-2 py-1 text-left"
+              >
+                Open in Digital Twin
+              </Link>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="rounded border border-border px-2 py-1 text-left text-muted-foreground"
+                title="Select an asset first"
+              >
+                Open in Digital Twin
+              </button>
+            )}
             <button
               type="button"
               disabled

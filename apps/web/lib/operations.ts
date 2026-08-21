@@ -107,6 +107,82 @@ export interface ProvenancePayload {
   fortyGuardFixture: Record<string, unknown> | null;
 }
 
+export interface TwinNode {
+  id: string;
+  sourceId: string;
+  type: string;
+  position: { x: number; y: number };
+  pressureM: number | null;
+  waterAgeHours: number | null;
+  residualMgL: number | null;
+  modeledWaterTemperatureC: number | null;
+  projectedTargetBreach: boolean;
+  flowM3s: number | null;
+  flags: string[];
+  nitrificationLevel: string | null;
+  nitrificationLabel: string | null;
+}
+
+export interface TwinEdge {
+  id: string;
+  sourceId: string;
+  parentId: string | null;
+  type: string;
+  source: string;
+  target: string;
+  flowM3s: number | null;
+  velocityMs: number | null;
+  derived: boolean;
+}
+
+export interface TwinGraph {
+  snapshotId: string;
+  networkId: string;
+  name: string;
+  sourceType: string;
+  geoReferenceType: string;
+  chemistry: ChemistryId;
+  operationalTargetMgL: number | null;
+  sampleTimeSeconds: number;
+  observationTime: string;
+  freshness: string;
+  availableTimes: OperationsContext["availableTimes"];
+  hydraulicsConverged: boolean;
+  nodes: TwinNode[];
+  edges: TwinEdge[];
+  scenario: { afterAvailable: false; notice: string };
+  counts: {
+    nodes: number;
+    edges: number;
+    junctions: number;
+    tanks: number;
+    reservoirs: number;
+    pumps: number;
+    valves: number;
+  };
+  language: string;
+  disclosure: string;
+  editing: { topologyEditable: false; notice: string };
+}
+
+export interface TwinTrace {
+  startId: string;
+  resolvedAssetId: string;
+  kind: "NODE" | "EDGE";
+  direction: "upstream" | "downstream";
+  nodeIds: string[];
+  edgeIds: string[];
+  supplyAssets: Array<{ id: string; type: string; sourceId: string }>;
+  notice: string;
+}
+
+export type TwinColorBy =
+  | "residual"
+  | "pressure"
+  | "water-age"
+  | "water-temperature"
+  | "target";
+
 export const operationsKeys = {
   all: ["operations"] as const,
   context: () => [...operationsKeys.all, "context"] as const,
@@ -115,6 +191,10 @@ export const operationsKeys = {
   asset: (id: string, chemistry: ChemistryId) =>
     [...operationsKeys.all, "asset", id, chemistry] as const,
   provenance: () => [...operationsKeys.all, "provenance"] as const,
+  twin: (chemistry: ChemistryId) =>
+    [...operationsKeys.all, "twin", chemistry] as const,
+  twinTrace: (asset: string, direction: "upstream" | "downstream") =>
+    [...operationsKeys.all, "twin-trace", asset, direction] as const,
 };
 
 export async function fetchContext(): Promise<OperationsContext> {
@@ -146,6 +226,23 @@ export async function fetchAsset(
 
 export async function fetchProvenance(): Promise<ProvenancePayload> {
   const { data } = await api.get<ProvenancePayload>("/operations/demo/provenance");
+  return data;
+}
+
+export async function fetchTwin(chemistry: ChemistryId): Promise<TwinGraph> {
+  const { data } = await api.get<TwinGraph>("/operations/demo/twin", {
+    params: { chemistry },
+  });
+  return data;
+}
+
+export async function fetchTwinTrace(
+  asset: string,
+  direction: "upstream" | "downstream",
+): Promise<TwinTrace> {
+  const { data } = await api.get<TwinTrace>("/operations/demo/twin/trace", {
+    params: { asset, direction },
+  });
   return data;
 }
 

@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { AppNav } from "@/components/app-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   fetchAsset,
@@ -103,27 +104,7 @@ export function OperationsShell() {
       <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2">
         <div className="flex items-center gap-4">
           <p className="text-sm font-semibold tracking-tight">VeinGuard</p>
-          <nav aria-label="Primary" className="flex gap-1 text-xs">
-            <span className="rounded-md bg-accent px-2 py-1 font-medium">Operations</span>
-            <span
-              className="rounded-md px-2 py-1 text-muted-foreground"
-              title="Digital Twin ships in a later phase"
-            >
-              Digital Twin
-            </span>
-            <span
-              className="rounded-md px-2 py-1 text-muted-foreground"
-              title="Intervention Lab ships in a later phase"
-            >
-              Intervention Lab
-            </span>
-            <span
-              className="rounded-md px-2 py-1 text-muted-foreground"
-              title="Resilience ships in a later phase"
-            >
-              Resilience
-            </span>
-          </nav>
+          <AppNav current="operations" />
         </div>
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-2 text-xs">
@@ -230,6 +211,11 @@ export function OperationsShell() {
             onToggle={() => setInspectorOpen((value) => !value)}
             detail={selectedId ? (assetQuery.data ?? null) : null}
             onProvenance={() => setProvenanceOpen(true)}
+            twinHref={
+              selectedId
+                ? `/digital-twin?asset=${encodeURIComponent(selectedId)}&chemistry=${chemistry}`
+                : undefined
+            }
           />
         </aside>
       </div>

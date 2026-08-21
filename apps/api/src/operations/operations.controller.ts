@@ -5,6 +5,7 @@ import { CORRELATION_HEADER, readCorrelationId } from '../common/correlation';
 import { fail, ok } from '../common/http';
 import { OperationsService } from './operations.service';
 import { LAYER_IDS } from './operations.layers';
+import type { TraceDirection } from './operations.twin';
 import type { ChemistryId, OperationsLayer } from './operations.types';
 
 @Public()
@@ -51,6 +52,55 @@ export class OperationsController {
     return ok(this.operations.layer(layer, profile), correlationId);
   }
 
+  @Get('demo/twin')
+  twin(
+    @Query('chemistry') chemistry: string | undefined,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const correlationId = readCorrelationId(request);
+    response.setHeader(CORRELATION_HEADER, correlationId);
+    const profile = parseChemistry(chemistry);
+    if (!profile) {
+      response.status(400);
+      return fail(
+        'VALIDATION_FAILED',
+        'chemistry must be FREE_CHLORINE or MONOCHLORAMINE.',
+        correlationId,
+      );
+    }
+    return ok(this.operations.twin(profile), correlationId);
+  }
+
+  @Get('demo/twin/trace')
+  twinTrace(
+    @Query('asset') asset: string | undefined,
+    @Query('direction') direction: string | undefined,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const correlationId = readCorrelationId(request);
+    response.setHeader(CORRELATION_HEADER, correlationId);
+    if (!asset) {
+      response.status(400);
+      return fail('VALIDATION_FAILED', 'asset is required.', correlationId);
+    }
+    if (!isTraceDirection(direction)) {
+      response.status(400);
+      return fail(
+        'VALIDATION_FAILED',
+        'direction must be upstream or downstream.',
+        correlationId,
+      );
+    }
+    const trace = this.operations.twinTrace(asset, direction);
+    if (!trace) {
+      response.status(404);
+      return fail('VALIDATION_FAILED', 'Asset not found.', correlationId);
+    }
+    return ok(trace, correlationId);
+  }
+
   @Get('demo/assets/:id')
   asset(
     @Param('id') id: string,
@@ -90,6 +140,10 @@ export class OperationsController {
 
 function isLayer(value: string): value is OperationsLayer {
   return (LAYER_IDS as string[]).includes(value);
+}
+
+function isTraceDirection(value: string | undefined): value is TraceDirection {
+  return value === 'upstream' || value === 'downstream';
 }
 
 function parseChemistry(value: string | undefined): ChemistryId | null {

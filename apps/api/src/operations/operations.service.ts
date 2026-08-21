@@ -6,6 +6,12 @@ import {
   operationsSnapshotPath,
 } from './operations.paths';
 import { LAYER_IDS, projectLayer } from './operations.layers';
+import {
+  buildTwinGraph,
+  scenarioPreviewUnavailable,
+  traceTwin,
+  type TraceDirection,
+} from './operations.twin';
 import type {
   ChemistryId,
   FeatureCollection,
@@ -155,6 +161,48 @@ export class OperationsService {
       return presentLink(link, snapshot);
     }
     return null;
+  }
+
+  twin(chemistry: ChemistryId) {
+    const snapshot = this.snapshot();
+    const graph = buildTwinGraph(snapshot, chemistry);
+    const aoi = JSON.parse(readFileSync(aoiPath(), 'utf8')) as {
+      eligibility?: string;
+    };
+    return {
+      ...graph,
+      snapshotId: snapshot.snapshotId,
+      geoReferenceType: snapshot.geoReferenceType,
+      freshness: snapshot.freshness,
+      availableTimes: snapshot.availableTimes,
+      hydraulicsConverged: snapshot.hydraulics.converged,
+      scenario: scenarioPreviewUnavailable(),
+      counts: {
+        nodes: graph.nodes.length,
+        edges: graph.edges.length,
+        junctions: graph.nodes.filter((node) => node.type === 'JUNCTION')
+          .length,
+        tanks: graph.nodes.filter((node) => node.type === 'TANK').length,
+        reservoirs: graph.nodes.filter((node) => node.type === 'RESERVOIR')
+          .length,
+        pumps: graph.nodes.filter((node) => node.type === 'PUMP').length,
+        valves: graph.nodes.filter((node) => node.type === 'VALVE').length,
+      },
+      language: 'modeled/projected/configured-target',
+      disclosure:
+        aoi.eligibility ??
+        'EPA Net3 is an EPA_BENCHMARK network with SYNTHETIC_GEOREFERENCING. Apply is digital-twin only.',
+      editing: {
+        topologyEditable: false,
+        notice:
+          'Digital Twin is view-only. CAD/network editing is not permitted.',
+      },
+    };
+  }
+
+  twinTrace(assetId: string, direction: TraceDirection) {
+    const graph = buildTwinGraph(this.snapshot(), 'FREE_CHLORINE');
+    return traceTwin(graph, assetId, direction);
   }
 
   provenance() {
