@@ -24,6 +24,7 @@ export { MemoryThermalStore, MongoThermalStore, newAcquisitionId } from "./store
 export type { ThermalStore } from "./store";
 export { validateAoi, pointInUnitedStates } from "./aoi";
 export { classifyFreshness } from "./freshness";
+export { NYC_BLOCK } from "./fixtures";
 export { normalizeStats } from "./stats";
 export type {
   CachedCompleted,

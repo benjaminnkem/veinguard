@@ -4,6 +4,7 @@ import { EnvModule } from "./config/env.module";
 import { FortyGuardModule } from "./fortyguard/fortyguard.module";
 import { HealthModule } from "./health/health.module";
 import { QueuesModule } from "./queues/queues.module";
+import { ResilienceWorkerModule } from "./resilience/resilience.module";
 import { SimulationWorkerModule } from "./simulation/simulation.module";
 
 @Module({
@@ -14,6 +15,7 @@ import { SimulationWorkerModule } from "./simulation/simulation.module";
     FortyGuardModule,
     SimulationWorkerModule,
     AgentWorkerModule,
+    ResilienceWorkerModule,
   ],
 })
 export class WorkerModule {}

@@ -10,6 +10,7 @@ import { MongoModule } from './mongo/mongo.module';
 import { AgentModule } from './agent/agent.module';
 import { LabModule } from './lab/lab.module';
 import { OperationsModule } from './operations/operations.module';
+import { ResilienceModule } from './resilience/resilience.module';
 import { ThermalModule } from './thermal/thermal.module';
 
 @Module({
@@ -25,6 +26,7 @@ import { ThermalModule } from './thermal/thermal.module';
     ThermalModule,
     AgentModule,
     LabModule,
+    ResilienceModule,
     OperationsModule,
   ],
   providers: [

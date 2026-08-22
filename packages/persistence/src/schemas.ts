@@ -213,6 +213,30 @@ export const LabStateSchema = new Schema(
   { collection: "labState", versionKey: false },
 );
 
+export const ResilienceStudySchema = new Schema(
+  {
+    _id: { type: String, default: newId },
+    organizationId: { type: String, required: true, index: true },
+    name: { type: String, required: true },
+    eventHours: { type: [String], required: true },
+    analytics: { type: [String], default: ["TCM"] },
+    runChemistry: { type: Boolean, default: true },
+    status: { type: String, required: true, enum: RUN_STATUSES, index: true },
+    events: { type: [Schema.Types.Mixed], default: [] },
+    aggregation: { type: Schema.Types.Mixed, default: null },
+    notices: { type: Schema.Types.Mixed, default: {} },
+    correlationId: { type: String, required: true },
+    error: {
+      code: { type: String, default: null },
+      message: { type: String, default: null },
+    },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+  },
+  { collection: "resilienceStudies", versionKey: false },
+);
+ResilienceStudySchema.index({ organizationId: 1, createdAt: -1 });
+
 export const MODEL_NAMES = {
   Organization: "Organization",
   User: "User",
@@ -225,4 +249,5 @@ export const MODEL_NAMES = {
   AgentEvent: "AgentEvent",
   Scenario: "Scenario",
   LabState: "LabState",
+  ResilienceStudy: "ResilienceStudy",
 } as const;

@@ -9,6 +9,7 @@ export {
   MODEL_NAMES,
   OrganizationSchema,
   RefreshTokenSchema,
+  ResilienceStudySchema,
   ScenarioSchema,
   SimulationRunSchema,
   UserSchema,

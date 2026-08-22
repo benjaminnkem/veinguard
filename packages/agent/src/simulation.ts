@@ -46,6 +46,22 @@ export class HttpSimulationClient implements SimulationPort {
     return this.request("/v1/networks/topology", { networkId });
   }
 
+  async runBaseline(input: {
+    networkId?: string;
+    fixtureId?: string;
+    snapshot?: Record<string, unknown>;
+    sampleTimeSeconds?: number;
+  }): Promise<Record<string, unknown>> {
+    return this.request("/v1/simulations/baseline", {
+      networkId: input.networkId ?? "epa-net3",
+      fortyGuard: {
+        fixtureId: input.fixtureId,
+        snapshot: input.snapshot,
+      },
+      sampleTimeSeconds: input.sampleTimeSeconds ?? 3600,
+    });
+  }
+
   private async request(path: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), this.timeoutMs);
