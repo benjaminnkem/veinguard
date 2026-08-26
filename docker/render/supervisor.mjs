@@ -5,6 +5,11 @@ import process from "node:process";
 const workspace = process.env.VEINGUARD_WORKSPACE ?? "/workspace";
 const children = new Map();
 let shuttingDown = false;
+const startupTimeoutMs = Number.parseInt(process.env.STARTUP_TIMEOUT_MS ?? "120000", 10);
+
+if (!Number.isInteger(startupTimeoutMs) || startupTimeoutMs < 10_000) {
+  throw new Error("STARTUP_TIMEOUT_MS must be an integer of at least 10000 milliseconds.");
+}
 
 const simulationToken = process.env.SIMULATION_SERVICE_TOKEN || process.env.SERVICE_TOKEN || "";
 
@@ -57,6 +62,10 @@ const simulationEnvironment = {
   NITRIFICATION_RISK_MODEL_VERSION: "nitrification-conditions-v1",
 };
 
+const internalServiceEnvironment = {
+  SIMULATION_SERVICE_BASE_URL: "http://127.0.0.1:8000",
+};
+
 const webEnvironment = {
   NODE_ENV: "production",
   PORT: "3000",
@@ -83,7 +92,11 @@ const services = [
     command: "node",
     args: ["apps/api/dist/main.js"],
     cwd: workspace,
-    env: childEnvironment({ PORT: "3001", SIMULATION_SERVICE_TOKEN: simulationToken }),
+    env: childEnvironment({
+      ...internalServiceEnvironment,
+      PORT: "3001",
+      SIMULATION_SERVICE_TOKEN: simulationToken,
+    }),
     port: 3001,
   },
   {
@@ -92,6 +105,7 @@ const services = [
     args: ["apps/worker/dist/main.js"],
     cwd: workspace,
     env: childEnvironment({
+      ...internalServiceEnvironment,
       WORKER_HEALTH_PORT: "3002",
       SIMULATION_SERVICE_TOKEN: simulationToken,
     }),
@@ -200,7 +214,7 @@ try {
   for (const service of services) {
     startService(service);
   }
-  await Promise.all(services.map((service) => waitForPort(service.port)));
+  await Promise.all(services.map((service) => waitForPort(service.port, startupTimeoutMs)));
   startService({
     name: "gateway",
     command: "node",

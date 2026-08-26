@@ -238,7 +238,11 @@ def _attach_monochloramine(baseline: dict[str, Any], nodes: dict[str, dict[str, 
     calibration = load_monochloramine_calibration()
     thresholds = load_nitrification_thresholds()
     node_kinds = {node_id: node["type"] for node_id, node in nodes.items()}
-    source_ids = [node_id for node_id, node in nodes.items() if node["type"] in {KIND_RESERVOIR, KIND_TANK}]
+    source_ids = [
+        node_id
+        for node_id, node in nodes.items()
+        if node["type"] in {KIND_RESERVOIR, KIND_TANK}
+    ]
     links = []
     for link in baseline.get("links") or []:
         if link["type"] != "PIPE":
@@ -287,9 +291,13 @@ def _attach_monochloramine(baseline: dict[str, Any], nodes: dict[str, dict[str, 
         network=network,
         residuals_mg_l={node_id: source_residual for node_id in nodes},
         temperatures_c={
-            node_id: float(node["modeledWaterTemperatureC"] or 15.0) for node_id, node in nodes.items()
+            node_id: float(node["modeledWaterTemperatureC"] or 15.0)
+            for node_id, node in nodes.items()
         },
-        water_age_hours={node_id: float(node.get("waterAgeHours") or 0.0) for node_id, node in nodes.items()},
+        water_age_hours={
+            node_id: float(node.get("waterAgeHours") or 0.0)
+            for node_id, node in nodes.items()
+        },
         free_ammonia_mg_n_l={node_id: free_ammonia for node_id in nodes},
         timestep_seconds=float(baseline.get("timestepSeconds") or 3600.0),
         calibration=calibration,

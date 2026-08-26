@@ -77,10 +77,7 @@ export function OperationsMap({
         zoom: 14.4,
       });
       mapRef.current = instance;
-      instance.addControl(
-        new NavigationControl({ showCompass: false }),
-        "bottom-right",
-      );
+      instance.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
       instance.on("error", (event) => {
         // Do not surface a style-provider response verbatim. It can be noisy,
         // provider-specific, and is not an actionable operator message.
@@ -170,11 +167,7 @@ export function OperationsMap({
     }
     setLayerVisibility(map, "vg-tcm-fill", quantLayer === "tcm");
     setLayerVisibility(map, "vg-quant-line", quantLayer === "flow");
-    setLayerVisibility(
-      map,
-      "vg-quant-point",
-      quantLayer !== "tcm" && quantLayer !== "flow",
-    );
+    setLayerVisibility(map, "vg-quant-point", quantLayer !== "tcm" && quantLayer !== "flow");
     applyPointPaint(map, quantLayer);
   }, [quantLayer, quantData, ready]);
 
@@ -246,18 +239,19 @@ export function OperationsMap({
         </p>
       ) : null}
       <div className="absolute left-3 top-3 z-10 flex items-center gap-1 border border-white/10 bg-[#0c0c0c]/90 p-1 shadow-xl backdrop-blur-sm">
-        <span className="px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-water">MAP / NETWORK STATE</span>
-        <span className="hidden border-l border-white/10 px-2 py-1 font-mono text-[9px] text-zinc-500 sm:inline">FORTYGUARD ↔ MODELED WATER</span>
+        <span className="px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-water">
+          MAP / NETWORK STATE
+        </span>
+        <span className="hidden border-l border-white/10 px-2 py-1 font-mono text-[9px] text-zinc-500 sm:inline">
+          FORTYGUARD ↔ MODELED WATER
+        </span>
       </div>
       <Legend layer={quantLayer} />
     </div>
   );
 }
 
-function addOverlayLayers(
-  map: MapLibreMap,
-  onSelectRef: { current: (id: string) => void },
-): void {
+function addOverlayLayers(map: MapLibreMap, onSelectRef: { current: (id: string) => void }): void {
   map.addSource("vg-tcm", { type: "geojson", data: EMPTY });
   map.addSource("vg-quant-fill", { type: "geojson", data: EMPTY });
   map.addSource("vg-quant-line", { type: "geojson", data: EMPTY });
@@ -308,7 +302,14 @@ function addOverlayLayers(
     source: "vg-network",
     layout: { "line-cap": "round", "line-join": "round" },
     paint: {
-      "line-color": ["case", ["==", ["get", "type"], "PUMP"], "#67D5EE", ["==", ["get", "type"], "VALVE"], "#BAE6FD", "#2A454A"],
+      "line-color": [
+        "case",
+        ["==", ["get", "type"], "PUMP"],
+        "#67D5EE",
+        ["==", ["get", "type"], "VALVE"],
+        "#BAE6FD",
+        "#2A454A",
+      ],
       "line-opacity": 0.9,
       "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.8, 16, 3.2],
     },
@@ -352,11 +353,31 @@ function addOverlayLayers(
     type: "circle",
     source: "vg-assets",
     paint: {
-      "circle-radius": ["case", ["boolean", ["feature-state", "selected"], false], 9, ["match", ["get", "type"], "TANK", 7, "RESERVOIR", 7, "JUNCTION", 3.5, 5]],
-      "circle-color": ["match", ["get", "type"], "TANK", "#0EA5C6", "RESERVOIR", "#67D5EE", "JUNCTION", "#E4E4E7", "#F59E0B"],
+      "circle-radius": [
+        "case",
+        ["boolean", ["feature-state", "selected"], false],
+        9,
+        ["match", ["get", "type"], "TANK", 7, "RESERVOIR", 7, "JUNCTION", 3.5, 5],
+      ],
+      "circle-color": [
+        "match",
+        ["get", "type"],
+        "TANK",
+        "#0EA5C6",
+        "RESERVOIR",
+        "#67D5EE",
+        "JUNCTION",
+        "#E4E4E7",
+        "#F59E0B",
+      ],
       "circle-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 1, 0.9],
       "circle-stroke-width": ["case", ["boolean", ["feature-state", "selected"], false], 2.5, 1.2],
-      "circle-stroke-color": ["case", ["boolean", ["feature-state", "selected"], false], "#BAE6FD", "#081114"],
+      "circle-stroke-color": [
+        "case",
+        ["boolean", ["feature-state", "selected"], false],
+        "#BAE6FD",
+        "#081114",
+      ],
       "circle-stroke-opacity": 0.95,
     },
   });
@@ -368,10 +389,14 @@ function addOverlayLayers(
       "text-field": [
         "match",
         ["get", "type"],
-        "RESERVOIR", "▽",
-        "TANK", "▣",
-        "PUMP", "◆",
-        "VALVE", "⋈",
+        "RESERVOIR",
+        "▽",
+        "TANK",
+        "▣",
+        "PUMP",
+        "◆",
+        "VALVE",
+        "⋈",
         "·",
       ],
       "text-size": ["match", ["get", "type"], "JUNCTION", 12, 15],
@@ -399,9 +424,7 @@ function addOverlayLayers(
   ];
   for (const layerId of clickLayers) {
     map.on("click", layerId, (event: MapLayerMouseEvent) => {
-      const id = String(
-        event.features?.[0]?.properties?.id ?? event.features?.[0]?.id ?? "",
-      );
+      const id = String(event.features?.[0]?.properties?.id ?? event.features?.[0]?.id ?? "");
       if (id) {
         onSelectRef.current(id);
       }
@@ -441,11 +464,7 @@ function styleBasemap(map: MapLibreMap): void {
   }
 }
 
-function setLayerVisibility(
-  map: MapLibreMap,
-  layerId: string,
-  visible: boolean,
-): void {
+function setLayerVisibility(map: MapLibreMap, layerId: string, visible: boolean): void {
   if (!map.getLayer(layerId) || !map.isStyleLoaded()) {
     return;
   }
@@ -489,16 +508,18 @@ function hydrateOverlaySources(
 }
 
 function boundsForCollection(collection: GeoJsonCollection): LngLatBounds | null {
+  // MapLibre accepts either an inline GeoJSON value or a URL string. Only a
+  // FeatureCollection has feature geometries that can be used for fitting.
+  if (typeof collection === "string" || collection.type !== "FeatureCollection") {
+    return null;
+  }
+
   const bounds = new LngLatBounds();
   let hasCoordinate = false;
 
   const visit = (value: unknown): void => {
     if (!Array.isArray(value)) return;
-    if (
-      value.length >= 2 &&
-      typeof value[0] === "number" &&
-      typeof value[1] === "number"
-    ) {
+    if (value.length >= 2 && typeof value[0] === "number" && typeof value[1] === "number") {
       bounds.extend([value[0], value[1]]);
       hasCoordinate = true;
       return;
@@ -506,8 +527,20 @@ function boundsForCollection(collection: GeoJsonCollection): LngLatBounds | null
     for (const child of value) visit(child);
   };
 
+  const visitGeometry = (
+    geometry: NonNullable<(typeof collection.features)[number]["geometry"]>,
+  ): void => {
+    if (geometry.type === "GeometryCollection") {
+      for (const child of geometry.geometries) visitGeometry(child);
+    } else {
+      visit(geometry.coordinates);
+    }
+  };
+
   for (const feature of collection.features) {
-    if (feature.geometry) visit(feature.geometry.coordinates);
+    const geometry = feature.geometry;
+    if (!geometry) continue;
+    visitGeometry(geometry);
   }
   return hasCoordinate ? bounds : null;
 }

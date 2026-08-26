@@ -38,6 +38,10 @@ Instance type: Free
 Health check path: /health/live
 ```
 
+Leave Render's **Build Command**, **Start Command**, and Docker command blank.
+The Dockerfile performs the build and its `CMD` starts the supervisor, exactly
+as in the Collage deployment pattern.
+
 Do not create a Render MongoDB, Postgres, Redis, Key Value, Background Worker,
 or second web service for this topology. Add the custom domain
 `veinguard.oluwadunsin.dev` to this one Web Service. Render's managed TLS will
@@ -76,9 +80,11 @@ NEXT_PUBLIC_MAP_STYLE_URL_DARK=https://tiles.openfreemap.org/styles/dark
 
 `SIMULATION_SERVICE_TOKEN` is injected into the simulation child process as its
 `SERVICE_TOKEN`; it only needs to be supplied once. The supervisor assigns
-internal ports (`3000`, `3001`, `3002`, `8000`) and leaves Render's public
-`PORT` for the gateway (`10000`). Do not set the four internal ports as the
-Render service port.
+the internal simulation URL (`http://127.0.0.1:8000`) and ports (`3000`,
+`3001`, `3002`, `8000`) and leaves Render's public `PORT` for the gateway
+(`10000`). Do not set the four internal ports as the Render service port.
+`STARTUP_TIMEOUT_MS` is optional; it defaults to `120000` so a remote Mongo
+connection has time to establish during a cold start.
 
 Optional tuning variables can be copied from the environment specification in
 `docs/09_ENVIRONMENT_SETUP.md`. The image supplies safe demo defaults for

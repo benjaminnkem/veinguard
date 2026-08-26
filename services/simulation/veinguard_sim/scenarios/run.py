@@ -207,7 +207,9 @@ def _network_state(wn: Any, hydraulics: Any, chemistry: Any, target: float) -> d
                     "pressureM": hyd.get("pressureM"),
                     "waterAgeHours": hyd.get("waterAgeHours"),
                     "residualMgL": residual,
-                    "projectedTargetBreach": bool(chem.target_breach) if chem is not None else False,
+                    "projectedTargetBreach": (
+                        bool(chem.target_breach) if chem is not None else False
+                    ),
                 }
             )
     links: list[dict[str, Any]] = []
