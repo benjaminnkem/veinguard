@@ -70,6 +70,17 @@ pnpm dev:simulation
 
 `/health/ready` is 503 until Mongo and Redis respond. That is intentional: missing dependencies are not faked.
 
+## Render deployment
+
+The Render Free deployment is a single Docker Web Service, not a Render
+Background Worker. It runs the Next.js app, Nest API, BullMQ worker, Python
+simulation service, and a path-routing gateway in one container. MongoDB and
+Redis are external services supplied through environment variables; the
+container does not provision datastores.
+
+Follow [docker/README.md](docker/README.md) for the Render settings, required
+environment variables, custom-domain routing, and smoke-test commands.
+
 ## Checks
 
 ```bash
