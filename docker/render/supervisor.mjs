@@ -100,7 +100,14 @@ const services = [
   {
     name: "web",
     command: "node",
-    args: ["node_modules/next/dist/bin/next", "start", "--hostname", "0.0.0.0", "--port", "3000"],
+    args: [
+      "apps/web/node_modules/next/dist/bin/next",
+      "start",
+      "--hostname",
+      "0.0.0.0",
+      "--port",
+      "3000",
+    ],
     cwd: workspace,
     env: publicChildEnvironment(webEnvironment),
     port: 3000,
