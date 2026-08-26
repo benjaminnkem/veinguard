@@ -3,7 +3,7 @@
 **Version:** 1.0  
 **Architecture:** TypeScript product platform + Python scientific service + asynchronous workers  
 **Primary persistence:** MongoDB  
-**AI provider:** Groq  
+**AI provider:** Gemini
 **Thermal provider:** FortyGuard
 
 # 1. Architecture principles
@@ -61,9 +61,9 @@
 - EPANET-MSX only after verified installation/validation
 
 ## AI
-- Groq SDK
+- Gemini REST `generateContent` client
 - env-configurable model
-- current default candidate: `openai/gpt-oss-20b`
+- current default candidate: `gemini-3.6-flash`
 - local tool calling
 
 # 3. Repository
@@ -116,7 +116,7 @@ NestJS API ------------------------> MongoDB
    |                               /   |    \
    |                              /    |     \
    v                             v     v      v
-FortyGuard API              Simulation Groq Resilience
+FortyGuard API              Simulation Gemini Resilience
                                   |
                                   v
                            Python FastAPI
@@ -143,7 +143,7 @@ FortyGuard API              Simulation Groq Resilience
 
 It does not:
 - call FortyGuard directly;
-- call Groq directly;
+- call Gemini directly;
 - calculate hydraulics/chemistry;
 - rank scenarios.
 
@@ -568,7 +568,7 @@ Exact weights/units:
 - not selected by LLM;
 - may be scenario/organization configuration.
 
-# 23. Groq agent architecture
+# 23. Gemini agent architecture
 
 State machine:
 
@@ -590,7 +590,7 @@ Terminal alternatives:
 - `LIMIT_REACHED`
 - `NO_FEASIBLE_SCENARIO`
 
-# 24. Groq tools
+# 24. Gemini tools
 
 Keep each call focused.
 
@@ -621,17 +621,17 @@ The backend enforces structured user constraints before simulation.
 # 26. Agent ranking rule
 
 ```text
-Groq candidate
+Gemini candidate
  -> schema validation
  -> user-constraint validation
  -> actual simulation
  -> hard constraints
  -> deterministic objective
  -> selected candidate
- -> Groq explanation
+ -> Gemini explanation
 ```
 
-Groq cannot override a rejection.
+Gemini cannot override a rejection.
 
 # 27. Agent persistence
 
@@ -796,7 +796,7 @@ Metrics hooks:
 - queue depth/wait;
 - simulation latency/failure;
 - agent steps/simulations;
-- Groq latency/failure;
+- Gemini latency/failure;
 - SSE connection count.
 
 # 35. Performance
@@ -866,6 +866,7 @@ Hackathon may co-locate API + worker if free hosting requires it, but code bound
 - ADR-005 water-temperature model
 - ADR-006 Free Chlorine coupling
 - ADR-007 Monochloramine + nitrification scope
-- ADR-008 Groq agent boundary
+- ADR-008 Groq agent boundary (superseded)
+- ADR-011 Gemini agent boundary
 - ADR-009 simulation artifact storage
 - ADR-010 hackathon vs production deployment

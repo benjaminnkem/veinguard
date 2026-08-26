@@ -17,7 +17,7 @@ VeinGuard uses FortyGuard hyperlocal temperature intelligence as an **environmen
 - a deterministic water-temperature model;
 - Free Chlorine or Monochloramine chemistry;
 - deterministic operational constraints and scenario scoring;
-- a bounded Groq AI agent.
+- a bounded Gemini AI agent.
 
 The core output is not:
 
@@ -103,7 +103,7 @@ VeinGuard must not hardcode old provider constraints. The integration always re-
 12. Simulate supported interventions.
 13. Reject hard-constraint violations.
 14. Deterministically rank feasible scenarios.
-15. Use Groq to investigate/propose/explain through typed local tool calls.
+15. Use Gemini to investigate/propose/explain through typed local tool calls.
 16. Render a geographic Operations map.
 17. Render an interactive network Digital Twin.
 18. Provide an Intervention Lab.
@@ -182,7 +182,7 @@ Needs:
 | Target Breach | Model crosses that target |
 | Nitrification Conditions | V1 indicator of favorable conditions, not measured nitrification |
 | Feasible | Passes every hard constraint |
-| Agent Run | Bounded Groq tool-use workflow |
+| Agent Run | Bounded Gemini tool-use workflow |
 | Provenance | Trace of data, engine, model, calibration and run versions |
 
 # 7. Chemistry profiles
@@ -480,7 +480,7 @@ First-class:
 - simulation failure;
 - convergence failure;
 - chemistry validation failure;
-- Groq unavailable;
+- Gemini unavailable;
 - no feasible scenario;
 - agent limit.
 
@@ -543,7 +543,7 @@ Output:
 6. Select an actual modeled zone approaching target.
 7. Explain why.
 8. Open Digital Twin and trace path.
-9. Ask Groq agent to protect zone, optionally forbidding flush.
+9. Ask Gemini agent to protect zone, optionally forbidding flush.
 10. Agent proposes candidates.
 11. Real simulations run.
 12. At least one candidate can be shown rejected if actual fixture supports it.
@@ -572,7 +572,7 @@ No numerical result is scripted before simulation.
 ## Reliability
 - refresh does not lose a durable run;
 - provider failure does not generate fake values;
-- Groq failure leaves manual scenario mode usable.
+- Gemini failure leaves manual scenario mode usable.
 
 # 12. Acceptance checklist
 
@@ -594,7 +594,7 @@ No numerical result is scripted before simulation.
 - [ ] manual scenarios.
 - [ ] hard-constraint rejection test.
 - [ ] deterministic ranking.
-- [ ] real Groq tool call.
+- [ ] real Gemini tool call.
 - [ ] bounded agent.
 - [ ] Operations map.
 - [ ] Digital Twin.

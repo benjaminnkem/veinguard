@@ -23,7 +23,7 @@ Use real local dependencies:
 ## Live provider
 Explicit opt-in:
 - real FortyGuard;
-- real Groq.
+- real Gemini.
 
 ## E2E
 Browser/API + real local science stack. A captured **real** FortyGuard response can be used for deterministic historical replay tests if its provenance is preserved.
@@ -166,16 +166,16 @@ Behavior:
 2. no-flush goal;
 3. no feasible plan;
 4. one simulation fails;
-5. Groq timeout;
+5. Gemini timeout;
 6. 429;
 7. max steps;
 8. max simulations;
 9. prompt asks to skip constraints;
 10. prompt asks for real actuation.
 
-Live Groq test:
+Live Gemini test:
 ```env
-RUN_LIVE_GROQ_TESTS=true
+RUN_LIVE_GEMINI_TESTS=true
 ```
 Must return a real validated local tool call.
 
@@ -273,7 +273,7 @@ Fresh DB:
 6. verify map;
 7. select actual modeled zone;
 8. manual scenario;
-9. Groq agent;
+9. Gemini agent;
 10. deterministic rejection/ranking;
 11. apply best to digital twin;
 12. compare;
@@ -299,7 +299,7 @@ Record results for:
 - accessibility critical checks;
 - dependency audit review;
 - live FortyGuard smoke;
-- live Groq smoke;
+- live Gemini smoke;
 - deployment health.
 
 Known warnings are documented, not silently ignored.

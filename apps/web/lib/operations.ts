@@ -1,4 +1,7 @@
 import { api } from "./api";
+import type { GeoJSONSource } from "maplibre-gl";
+
+export type GeoJsonCollection = Parameters<GeoJSONSource["setData"]>[0];
 
 export type ChemistryId = "FREE_CHLORINE" | "MONOCHLORAMINE";
 export type OperationsLayer =
@@ -63,18 +66,7 @@ export interface LayerResponse {
   modeled?: boolean;
   message?: string;
   freshness?: string;
-  geojson: {
-    type: "FeatureCollection";
-    features: Array<{
-      type: "Feature";
-      id?: string | number;
-      properties: Record<string, unknown> | null;
-      geometry: {
-        type: string;
-        coordinates: unknown;
-      };
-    }>;
-  };
+  geojson: GeoJsonCollection;
 }
 
 export interface AssetDetail {

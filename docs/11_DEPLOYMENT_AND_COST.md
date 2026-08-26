@@ -25,8 +25,8 @@ MongoDB
 Redis
  -> Upstash Redis Free or other compatible free Redis
 
-Groq
- -> Free plan
+Gemini
+ -> Google AI Studio / Gemini API; quota depends on model and project tier
 
 FortyGuard
  -> hackathon/trial credentials
@@ -70,13 +70,15 @@ Therefore:
 - monitor command use;
 - production queue infrastructure should be sized appropriately.
 
-# 5. Groq
+# 5. Gemini
 
-Groq has model-specific Free-plan rate limits.
+VeinGuard accepts four server-only keys and advances on a 429/quota response.
+Google documents many Gemini rate limits per project, so keys only provide
+independent capacity when they belong to separately limited projects.
 
 Current candidate:
 ```text
-openai/gpt-oss-20b
+gemini-3.6-flash
 ```
 
 Keep costs low with:
@@ -145,7 +147,7 @@ Hackathon:
 - protected API;
 - benchmark network;
 - cached/historical real FortyGuard;
-- real Groq.
+- real Gemini.
 
 Future production:
 - separate services;
@@ -165,7 +167,7 @@ Future production:
 - [ ] WNTR/EPANET Linux container works
 - [ ] service auth
 - [ ] FortyGuard live smoke
-- [ ] Groq live smoke
+- [ ] Gemini live smoke
 - [ ] MapLibre style loads
 - [ ] CORS/auth origins
 - [ ] SSE through hosting proxy

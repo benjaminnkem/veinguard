@@ -6,7 +6,7 @@ Do not build the product in one prompt. Each phase must remain runnable/testable
 Read handoff + AGENTS. Re-check current:
 - FortyGuard;
 - EPA/WNTR/EPANET/MSX;
-- Groq;
+- Gemini;
 - Next/Nest/Mongo;
 - MapLibre/React Flow;
 - BullMQ/Redis.
@@ -139,7 +139,7 @@ Build:
 - compare API;
 - real rejected candidate tests.
 
-## Phase 10 — Groq agent
+## Phase 10 — Gemini agent
 Current official docs first.
 Build:
 - configurable supported model;

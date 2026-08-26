@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { compareScenarios } from '@repo/agent';
 import type { ApiEnv } from '@repo/config';
-import { QUEUE_NAMES } from '@repo/config';
+import { geminiApiKeys, QUEUE_NAMES } from '@repo/config';
 import { MODEL_NAMES, newId } from '@repo/persistence';
 import type { Queue } from 'bullmq';
 import { readFileSync } from 'node:fs';
@@ -110,7 +110,7 @@ export class LabService {
         heat: HEAT_UNCHANGED_NOTICE,
         time: 'Intervention times are relative to the EPANET scenario origin (t=0). Selected sample is 1 h.',
       },
-      groqConfigured: this.env.GROQ_API_KEY.length > 0,
+      geminiConfigured: geminiApiKeys(this.env).length > 0,
       disclosure:
         aoi.eligibility ??
         'EPA Net3 is an EPA_BENCHMARK network with SYNTHETIC_GEOREFERENCING. Apply is digital-twin only.',
@@ -330,11 +330,30 @@ export class LabService {
     correlationId: string,
   ) {
     const snapshot = this.snapshot();
+    const rawConstraints =
+      input.structuredConstraints &&
+      typeof input.structuredConstraints === 'object'
+        ? (input.structuredConstraints as Record<string, unknown>)
+        : {};
     return this.agent.create({
       organizationId: DEMO_ORG_ID,
       baselineRunId: snapshot.snapshotId,
       goal: input.goal,
-      structuredConstraints: input.structuredConstraints,
+      structuredConstraints: {
+        ...rawConstraints,
+        networkId:
+          typeof rawConstraints.networkId === 'string'
+            ? rawConstraints.networkId
+            : snapshot.networkId,
+        sampleTimeSeconds:
+          typeof rawConstraints.sampleTimeSeconds === 'number'
+            ? rawConstraints.sampleTimeSeconds
+            : snapshot.sampleTimeSeconds,
+        horizonStart:
+          typeof rawConstraints.horizonStart === 'string'
+            ? rawConstraints.horizonStart
+            : snapshot.observationTime,
+      },
       baselineSummary: snapshot as unknown as Record<string, unknown>,
       correlationId,
     });

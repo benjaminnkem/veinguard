@@ -11,6 +11,7 @@ Planned:
 - ADR-005 water-temperature model
 - ADR-006 Free Chlorine coupling
 - ADR-007 Monochloramine + nitrification scope
-- ADR-008 Groq agent boundary (accepted)
+- ADR-008 Groq agent boundary (superseded)
 - ADR-009 simulation artifact storage
 - ADR-010 hackathon vs production deployment
+- ADR-011 Gemini agent boundary (accepted)

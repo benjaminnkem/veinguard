@@ -11,7 +11,7 @@ This repository is a pnpm/Turborepo workspace:
 - `packages/contracts` — shared TypeScript contracts
 - `packages/config` — shared env/queue configuration
 
-Provider keys never belong in the browser. There is no mock FortyGuard, EPANET, or Groq fallback in runtime.
+Provider keys never belong in the browser. There is no mock FortyGuard, EPANET, or Gemini fallback in runtime.
 
 ## Prerequisites
 
@@ -36,10 +36,13 @@ Then add real provider keys to:
 
 ```env
 FORTYGUARD_API_KEY=...
-GROQ_API_KEY=...
+GEMINI_API_KEY_1=...
+GEMINI_API_KEY_2=...
+GEMINI_API_KEY_3=...
+GEMINI_API_KEY_4=...
 ```
 
-Copy the same FortyGuard/Groq values into the worker env. Do not commit `.env` files.
+Copy the same FortyGuard/Gemini values into the worker env. Do not commit `.env` files.
 
 Manual equivalent:
 
@@ -87,4 +90,4 @@ pytest
 
 ## Phase status
 
-Phase 01 is foundation only. EPANET, FortyGuard acquisition, chemistry, and the Groq agent are later phases.
+Phase 01 is foundation only. EPANET, FortyGuard acquisition, chemistry, and the Gemini agent are later phases.

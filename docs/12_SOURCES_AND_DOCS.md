@@ -105,21 +105,19 @@ Primary:
 
 Validate model domain and parameter meaning before implementation.
 
-# 8. Groq
+# 8. Gemini
 
-- https://console.groq.com/docs/models
-- https://console.groq.com/docs/model/openai/gpt-oss-20b
-- https://console.groq.com/docs/tool-use/overview
-- https://console.groq.com/docs/tool-use/local-tool-calling
-- https://console.groq.com/docs/structured-outputs
-- https://console.groq.com/docs/rate-limits
-- https://console.groq.com/docs/deprecations
+- https://ai.google.dev/api/generate-content
+- https://ai.google.dev/gemini-api/docs/function-calling
+- https://ai.google.dev/gemini-api/docs/models
+- https://ai.google.dev/gemini-api/docs/rate-limits
+- https://ai.google.dev/gemini-api/docs/deprecations
 
 Important verified handoff fact:
-- `llama-3.3-70b-versatile` and `llama-3.1-8b-instant` were listed as shut down/deprecated on 2026-08-16 for the applicable free/developer usage.
-- `openai/gpt-oss-20b` is the current default candidate, not an eternal lock.
+- `gemini-3.6-flash` is a stable model with no announced shutdown date at the
+  time of this migration, not an eternal lock.
 
-Groq Structured Outputs/tool-use limitations should be re-read when implementing. Do not assume strict JSON Schema mode can be combined with every tool/streaming pattern.
+Gemini Structured Outputs/tool-use limitations should be re-read when implementing. Do not assume strict JSON Schema mode can be combined with every tool/streaming pattern.
 
 # 9. Next.js
 

@@ -26,31 +26,29 @@ export function Inspector({
     );
   }
   return (
-    <div className="flex h-full flex-col overflow-auto p-3 text-xs">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="font-semibold">Inspector</h2>
-        <button type="button" onClick={onToggle} className="text-muted-foreground">
-          Hide
+    <div className="flex h-full flex-col overflow-auto p-4 text-xs">
+      <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
+        <div><p className="font-mono text-[9px] uppercase tracking-[0.16em] text-water">Context inspector</p><h2 className="mt-1 text-sm font-medium">Modeled asset state</h2></div>
+        <button type="button" onClick={onToggle} className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground">
+          Close
         </button>
       </div>
       {!detail ? (
-        <p className="text-muted-foreground">
+        <div className="border border-dashed border-white/15 bg-white/[.02] p-3 text-muted-foreground">
           Select an asset on the map. Metrics are shown only when the run calculated them.
-        </p>
+        </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-sm font-semibold">
-            {detail.type} {detail.sourceId}
-          </p>
+          <div><p className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">{detail.type}</p><p className="mt-1 text-lg font-light">{detail.sourceId}</p></div>
           {detail.chemistryState?.projectedTargetBreach ? (
-            <p className="rounded bg-red-950/40 px-2 py-1 text-red-200">
+            <p className="border border-danger/35 bg-danger/10 px-3 py-2 text-danger">
               Projected target breach · configured operational target
             </p>
           ) : null}
-          <p className="text-muted-foreground">EPA benchmark network</p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">EPA_BENCHMARK · SYNTHETIC_GEOREFERENCING</p>
           {detail.hydraulics ? (
             <section>
-              <h3 className="font-medium">Hydraulics</h3>
+              <SectionTitle title="Hydraulics" />
               <Metric label="Pressure (m)" value={detail.hydraulics.pressureM} />
               <Metric label="Flow (m³/s)" value={detail.hydraulics.flowM3s} />
               <Metric label="Velocity (m/s)" value={detail.hydraulics.velocityMs} />
@@ -59,7 +57,7 @@ export function Inspector({
           ) : null}
           {detail.thermal ? (
             <section>
-              <h3 className="font-medium">Thermal</h3>
+              <SectionTitle title="Thermal state" />
               <Metric
                 label="FortyGuard cell"
                 value={detail.thermal.fortyGuardCellId}
@@ -76,7 +74,7 @@ export function Inspector({
           ) : null}
           {detail.chemistryState ? (
             <section>
-              <h3 className="font-medium">Chemistry</h3>
+              <SectionTitle title="Chemistry" />
               <Metric
                 label="Modeled residual (mg/L)"
                 value={detail.chemistryState.residualMgL}
@@ -100,7 +98,7 @@ export function Inspector({
             </section>
           ) : null}
           <section>
-            <h3 className="font-medium">Why?</h3>
+            <SectionTitle title="Why?" />
             {detail.why && detail.why.length > 0 ? (
               <ul className="list-disc pl-4">
                 {detail.why.map((item) => (
@@ -117,7 +115,7 @@ export function Inspector({
             {twinHref === null ? null : twinHref ? (
               <Link
                 href={twinHref}
-                className="rounded border border-border px-2 py-1 text-left"
+                className="border border-water/25 bg-water/10 px-3 py-2 text-left text-water hover:bg-water/15"
               >
                 Open in Digital Twin
               </Link>
@@ -125,7 +123,7 @@ export function Inspector({
               <button
                 type="button"
                 disabled
-                className="rounded border border-border px-2 py-1 text-left text-muted-foreground"
+                className="border border-white/10 px-3 py-2 text-left text-muted-foreground"
                 title="Select an asset first"
               >
                 Open in Digital Twin
@@ -133,13 +131,13 @@ export function Inspector({
             )}
             <Link
               href="/intervention-lab"
-              className="rounded border border-border px-2 py-1 text-left"
+              className="border border-white/10 px-3 py-2 text-left text-zinc-300 hover:border-white/25"
             >
               Create scenario
             </Link>
             <button
               type="button"
-              className="rounded border border-border px-2 py-1 text-left"
+              className="border border-white/10 px-3 py-2 text-left text-zinc-300 hover:border-white/25"
               onClick={onProvenance}
             >
               View provenance
@@ -165,9 +163,13 @@ function Metric({
         ? value.toPrecision(4)
         : String(value);
   return (
-    <p className="flex justify-between gap-2">
+    <p className="flex justify-between gap-2 border-b border-white/[.06] py-1.5">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono">{display}</span>
+      <span className="font-mono text-zinc-200">{display}</span>
     </p>
   );
+}
+
+function SectionTitle({ title }: { title: string }) {
+  return <h3 className="mb-1 font-mono text-[9px] uppercase tracking-[0.16em] text-water">{title}</h3>;
 }

@@ -4,7 +4,7 @@ import type {
   CompactNetwork,
   CompactNetworkLink,
   CompactZone,
-  GroqChatMessage,
+  GeminiChatMessage,
 } from "./types";
 
 export function truncateJson(value: unknown, maxBytes = DEFAULT_TOOL_RESULT_MAX_BYTES): string {
@@ -33,7 +33,7 @@ export function clipRationale(text: string, maxChars = DEFAULT_RATIONALE_MAX_CHA
   return `${cleaned.slice(0, maxChars - 1).trimEnd()}…`;
 }
 
-export function capMessages(messages: GroqChatMessage[], maxBytes: number): GroqChatMessage[] {
+export function capMessages(messages: GeminiChatMessage[], maxBytes: number): GeminiChatMessage[] {
   const encoded = () => Buffer.byteLength(JSON.stringify(messages), "utf8");
   if (encoded() <= maxBytes) {
     return messages;

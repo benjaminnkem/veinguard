@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import type { GeoJSONSource } from "maplibre-gl";
 import { AppNav } from "@/components/app-nav";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
@@ -46,7 +47,10 @@ const QUANT_LAYERS: OperationsLayer[] = [
   "nitrification",
 ];
 
-const EMPTY_COLLECTION = { type: "FeatureCollection", features: [] };
+const EMPTY_COLLECTION: Parameters<GeoJSONSource["setData"]>[0] = {
+  type: "FeatureCollection",
+  features: [],
+};
 
 export function OperationsShell() {
   const [chemistry, setChemistry] = useState<ChemistryId>("FREE_CHLORINE");
@@ -101,16 +105,15 @@ export function OperationsShell() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-foreground">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2">
+      <header className="z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#0c0c0c] px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,.18)] lg:px-5">
         <div className="flex items-center gap-4">
-          <p className="text-sm font-semibold tracking-tight">VeinGuard</p>
           <AppNav current="operations" />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
           <label className="flex items-center gap-2 text-xs">
             <span className="text-muted-foreground">Chemistry</span>
             <select
-              className="rounded-md border border-border bg-card px-2 py-1"
+              className="max-w-[9rem] border border-white/15 bg-[#111214] px-2.5 py-1.5 text-[11px] text-foreground"
               value={chemistry}
               onChange={(event) => {
                 const next = event.target.value as ChemistryId;
@@ -133,15 +136,15 @@ export function OperationsShell() {
           </label>
           <button
             type="button"
-            className="rounded-md border border-border px-2 py-1 text-xs"
+            className="border border-water/25 bg-water/10 px-2.5 py-1.5 text-[11px] text-water"
             onClick={() => setProvenanceOpen(true)}
           >
             Provenance
           </button>
-          <Link href="/setup" className="text-xs text-muted-foreground underline">
+          <Link href="/setup" className="text-[11px] text-muted-foreground hover:text-foreground">
             Setup
           </Link>
-          <ThemeToggle />
+          <span className="hidden sm:inline-flex"><ThemeToggle /></span>
         </div>
       </header>
 
@@ -189,6 +192,12 @@ export function OperationsShell() {
           />
         </aside>
         <div className="relative min-h-0 min-w-0 flex-1">
+          <div className="pointer-events-none absolute left-3 right-3 top-3 z-20 flex justify-between md:hidden">
+            <div className="pointer-events-auto flex gap-1 border border-white/10 bg-[#0c0c0c]/95 p-1 shadow-xl backdrop-blur-sm">
+              <button type="button" className={`px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] ${layersOpen ? "bg-water/10 text-water" : "text-zinc-400"}`} onClick={() => setLayersOpen((value) => !value)}>Layers</button>
+              <button type="button" className={`px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] ${inspectorOpen ? "bg-water/10 text-water" : "text-zinc-400"}`} onClick={() => setInspectorOpen((value) => !value)}>Inspect</button>
+            </div>
+          </div>
           <OperationsMap
             quantLayer={visibleQuant}
             quantData={quantQuery.data?.geojson ?? EMPTY_COLLECTION}
@@ -197,6 +206,8 @@ export function OperationsShell() {
             onSelect={setSelectedId}
             selectedId={selectedId}
           />
+          {layersOpen ? <div className="absolute left-3 top-14 z-20 max-h-[55%] w-[min(18rem,calc(100%-1.5rem))] overflow-auto border border-white/10 bg-[#0c0c0c]/95 shadow-2xl backdrop-blur-sm md:hidden"><LayerPanel open={layersOpen} onToggle={() => setLayersOpen(false)} quantLayer={visibleQuant} onQuantLayer={setQuantLayer} showNetwork={showNetwork} onShowNetwork={setShowNetwork} showAssets={showAssets} onShowAssets={setShowAssets} chemistry={chemistry} layers={LAYER_META} groups={QUANT_LAYERS} /></div> : null}
+          {inspectorOpen && selectedId ? <div className="absolute bottom-3 left-3 right-3 z-20 max-h-[48%] overflow-auto border border-white/10 bg-[#0c0c0c]/95 shadow-2xl backdrop-blur-sm lg:hidden"><Inspector open onToggle={() => setInspectorOpen(false)} detail={assetQuery.data ?? null} onProvenance={() => setProvenanceOpen(true)} twinHref={selectedId ? `/digital-twin?asset=${encodeURIComponent(selectedId)}&chemistry=${chemistry}` : undefined} /></div> : null}
           {layerMessage ? (
             <p className="pointer-events-none absolute left-3 top-3 rounded-md bg-card/90 px-3 py-2 text-xs shadow">
               {layerMessage}

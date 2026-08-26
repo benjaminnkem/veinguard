@@ -14,7 +14,7 @@ Heat-aware drinking-water distribution digital twin and decision support.
 - MongoDB
 - Python/FastAPI scientific simulation service
 - WNTR/EPANET
-- Groq
+- Gemini
 - MapLibre
 - React Flow
 - BullMQ/Redis
@@ -44,13 +44,14 @@ V1 is a transparent favorable-conditions/risk indicator, not a biological concen
 - digital twin only;
 - no real actuation.
 
-# 2. Current Groq candidate
+# 2. Current Gemini model
 
 ```text
-openai/gpt-oss-20b
+gemini-3.6-flash
 ```
 
-The previous idea of `llama-3.3-70b-versatile` must not be used; current Groq deprecation docs win.
+The model remains environment-configurable; the stable `gemini-3.6-flash`
+default is preferred for the bounded tool-calling loop.
 
 Model remains env-configurable.
 

@@ -4,21 +4,22 @@ import { detectActuationRequest } from "./constraints";
 import { AgentError } from "./errors";
 import { ToolSession } from "./execute";
 import { systemPrompt, userPrompt } from "./prompt";
-import { GROQ_TOOLS } from "./tools";
+import { GEMINI_TOOLS } from "./tools";
+import { DEFAULT_GEMINI_MAX_OUTPUT_TOKENS } from "./docs";
 import type { AgentStore } from "./store";
 import type {
   AgentEvent,
   AgentLimits,
   AgentRun,
-  GroqChatMessage,
-  GroqClient,
+  GeminiChatMessage,
+  GeminiClient,
   SimulationPort,
 } from "./types";
 import type { AgentOutcome, RunStatus } from "@repo/contracts";
 
 export interface LoopInput {
   run: AgentRun;
-  groq: GroqClient;
+  gemini: GeminiClient;
   simulation: SimulationPort;
   store: AgentStore;
   limits: AgentLimits;
@@ -54,7 +55,7 @@ export async function runAgentLoop(input: LoopInput): Promise<AgentRun> {
   const session = new ToolSession(run, input.simulation, {
     maxSimulations: input.limits.maxSimulations,
   });
-  const messages: GroqChatMessage[] = [
+  const messages: GeminiChatMessage[] = [
     { role: "system", content: systemPrompt() },
     { role: "user", content: userPrompt(run) },
   ];
@@ -74,12 +75,13 @@ export async function runAgentLoop(input: LoopInput): Promise<AgentRun> {
         });
       }
       steps += 1;
-      const result = await input.groq.chat({
+      const result = await input.gemini.chat({
         model: run.modelId,
         messages: capMessages(messages, input.limits.contextMaxBytes),
-        tools: [...GROQ_TOOLS],
+        tools: [...GEMINI_TOOLS],
         tool_choice: "auto",
         temperature: 0.2,
+        max_completion_tokens: DEFAULT_GEMINI_MAX_OUTPUT_TOKENS,
       });
       lastContent = result.content;
       if (result.toolCalls.length === 0) {
@@ -92,6 +94,7 @@ export async function runAgentLoop(input: LoopInput): Promise<AgentRun> {
           id: call.id,
           type: "function",
           function: { name: call.name, arguments: call.arguments },
+          ...(call.thoughtSignature ? { thoughtSignature: call.thoughtSignature } : {}),
         })),
       });
       for (const call of result.toolCalls) {
@@ -194,7 +197,10 @@ function selectedRationale(
 
 function publicRationale(text: string): string {
   const cleaned = text.replace(/```[\s\S]*?```/g, " ").trim();
-  const parts = cleaned.split(/\n{2,}/).map((part) => part.trim()).filter(Boolean);
+  const parts = cleaned
+    .split(/\n{2,}/)
+    .map((part) => part.trim())
+    .filter(Boolean);
   return clipRationale(parts[parts.length - 1] ?? cleaned);
 }
 

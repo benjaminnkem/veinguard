@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AppNav } from "@/components/app-nav";
 import { StatusBar } from "@/components/operations/status-bar";
@@ -49,10 +49,11 @@ export function ResilienceShell() {
         : 10000;
     },
   });
+  const activeStudyId = selectedId ?? listQuery.data?.[0]?.id ?? null;
   const studyQuery = useQuery({
-    queryKey: resilienceKeys.study(selectedId ?? ""),
-    queryFn: () => fetchStudy(selectedId!),
-    enabled: selectedId != null,
+    queryKey: resilienceKeys.study(activeStudyId ?? ""),
+    queryFn: () => fetchStudy(activeStudyId!),
+    enabled: activeStudyId != null,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
       return status === "QUEUED" || status === "RUNNING" ? 2000 : false;
@@ -72,35 +73,27 @@ export function ResilienceShell() {
   const ctx = contextQuery.data;
   const study = studyQuery.data;
 
-  useEffect(() => {
-    if (selectedId || !listQuery.data?.length) {
-      return;
-    }
-    setSelectedId(listQuery.data[0]!.id);
-  }, [listQuery.data, selectedId]);
-
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-foreground">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#0c0c0c] px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,.18)]">
         <div className="flex items-center gap-4">
-          <p className="text-sm font-semibold tracking-tight">VeinGuard</p>
           <AppNav current="resilience" />
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/setup" className="text-xs text-muted-foreground underline">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+          <Link href="/setup" className="text-[11px] text-muted-foreground hover:text-foreground">
             Setup
           </Link>
-          <ThemeToggle />
+          <span className="hidden sm:inline-flex"><ThemeToggle /></span>
         </div>
       </header>
       <StatusBar context={opsQuery.data ?? null} chemistry="FREE_CHLORINE" />
-      <div role="status" className="border-b border-border bg-accent/40 px-4 py-2 text-xs">
+      <div role="status" className="border-b border-white/10 bg-water/5 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.1em] text-water">
         {ctx?.notices.sample} {ctx?.notices.causation}
       </div>
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <aside className="hidden w-72 shrink-0 overflow-auto border-r border-border p-3 text-xs md:block">
-          <h2 className="mb-2 font-semibold">New study</h2>
+        <aside className="hidden w-72 shrink-0 overflow-auto border-r border-white/10 bg-[#0c0c0c] p-4 text-xs md:block">
+          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-water">Historical replay</p><h2 className="mb-2 mt-1 text-sm font-medium">New study</h2>
           <p className="mb-2 text-muted-foreground">{ctx?.notices.captured}</p>
           <form
             className="flex flex-col gap-2"
@@ -143,7 +136,7 @@ export function ResilienceShell() {
             <button
               type="submit"
               disabled={!ctx || create.isPending}
-              className="rounded-md bg-accent px-3 py-1.5 font-medium disabled:text-muted-foreground"
+              className="border border-water bg-water px-3 py-1.5 font-medium text-[#050505] disabled:opacity-40"
             >
               {create.isPending ? "Queuing…" : "Start study"}
             </button>
@@ -155,7 +148,7 @@ export function ResilienceShell() {
                 <button
                   type="button"
                   className={`block w-full rounded px-2 py-1 text-left ${
-                    selectedId === row.id ? "bg-accent font-medium" : ""
+                    activeStudyId === row.id ? "bg-water/10 font-medium text-water" : ""
                   }`}
                   onClick={() => setSelectedId(row.id)}
                 >
@@ -309,12 +302,12 @@ function Card({
   note?: string;
 }) {
   return (
-    <article className="rounded-md border border-border bg-card px-3 py-2">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+    <article className="border border-white/10 bg-[#0c0c0c] px-3 py-3">
+      <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
         {label}
       </p>
-      <p className="mt-1 font-semibold">{value}</p>
-      {note ? <p className="text-[11px] text-muted-foreground">{note}</p> : null}
+      <p className="mt-1 text-lg font-light">{value}</p>
+      {note ? <p className="font-mono text-[9px] text-muted-foreground">{note}</p> : null}
     </article>
   );
 }

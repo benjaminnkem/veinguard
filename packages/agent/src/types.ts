@@ -158,40 +158,43 @@ export interface AgentLimits {
   contextMaxBytes: number;
 }
 
-export interface GroqToolCall {
+export interface GeminiToolCall {
   id: string;
   name: AgentToolName | string;
   arguments: string;
+  /** Opaque Gemini reasoning signature needed for subsequent REST turns. */
+  thoughtSignature?: string;
 }
 
-export interface GroqChatMessage {
+export interface GeminiChatMessage {
   role: "system" | "user" | "assistant" | "tool";
   content?: string | null;
   tool_calls?: Array<{
     id: string;
     type: "function";
     function: { name: string; arguments: string };
+    thoughtSignature?: string;
   }>;
   tool_call_id?: string;
   name?: string;
 }
 
-export interface GroqChatRequest {
+export interface GeminiChatRequest {
   model: string;
-  messages: GroqChatMessage[];
+  messages: GeminiChatMessage[];
   tools: unknown[];
   tool_choice?: "auto" | "none" | "required";
   temperature?: number;
   max_completion_tokens?: number;
 }
 
-export interface GroqChatResult {
+export interface GeminiChatResult {
   content: string | null;
-  toolCalls: GroqToolCall[];
+  toolCalls: GeminiToolCall[];
 }
 
-export interface GroqClient {
-  chat(request: GroqChatRequest): Promise<GroqChatResult>;
+export interface GeminiClient {
+  chat(request: GeminiChatRequest): Promise<GeminiChatResult>;
 }
 
 export interface SimulationPort {

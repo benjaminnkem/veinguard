@@ -7,13 +7,11 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import type { ApiEnv } from '@repo/config';
-import { QUEUE_NAMES } from '@repo/config';
 import { MODEL_NAMES } from '@repo/persistence';
 import type { Model } from 'mongoose';
 import {
-  AgentError,
   compactBaselineFromSummary,
-  GroqHttpClient,
+  GeminiHttpClient,
   MemoryAgentStore,
   MongoAgentStore,
   newAgentRunId,
@@ -22,7 +20,7 @@ import {
   type AgentRun,
   type AgentStore,
 } from '@repo/agent';
-import { RETIRED_GROQ_MODELS } from '@repo/agent';
+import { geminiApiKeys, QUEUE_NAMES } from '@repo/config';
 import type { Queue } from 'bullmq';
 import { MongoClient } from 'mongodb';
 import { API_ENV } from '../config/env.module';
@@ -71,17 +69,11 @@ export class AgentService implements OnModuleInit, OnModuleDestroy {
   }
 
   assertAvailable(): void {
-    const client = new GroqHttpClient({
-      apiKey: this.env.GROQ_API_KEY,
-      model: this.env.GROQ_MODEL,
+    const client = new GeminiHttpClient({
+      apiKeys: geminiApiKeys(this.env),
+      model: this.env.GEMINI_MODEL,
     });
     client.assertConfigured();
-    if (RETIRED_GROQ_MODELS.has(this.env.GROQ_MODEL)) {
-      throw new AgentError(
-        'UNAVAILABLE',
-        `GROQ_MODEL '${this.env.GROQ_MODEL}' is retired.`,
-      );
-    }
   }
 
   async create(input: {
@@ -119,7 +111,7 @@ export class AgentService implements OnModuleInit, OnModuleDestroy {
       goal: input.goal,
       structuredConstraints: normalizeConstraints(input.structuredConstraints),
       baselineRunId: input.baselineRunId,
-      modelId: this.env.GROQ_MODEL,
+      modelId: this.env.GEMINI_MODEL,
       compactBaseline,
       compactNetwork: null,
       selectedScenarioRunId: null,

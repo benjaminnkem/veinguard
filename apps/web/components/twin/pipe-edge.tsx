@@ -49,11 +49,7 @@ export function PipeEdge({
   const absFlow = flow == null ? 0 : Math.abs(flow);
   const directed = flow != null && absFlow >= FLOW_EPSILON;
   const muted = Boolean(data?.muted);
-  const stroke = muted
-    ? "#94a3b8"
-    : directed
-      ? "#334155"
-      : "#94a3b8";
+  const stroke = muted ? "#1F2A2D" : directed ? "#1D5967" : "#334448";
   const width = muted ? 1 : 1.2 + Math.min(4, absFlow * 8);
 
   return (
@@ -70,10 +66,23 @@ export function PipeEdge({
         markerEnd={markerEnd}
         markerStart={markerStart}
       />
+      {selected && directed ? (
+        <BaseEdge
+          id={`${id}-trace`}
+          path={path}
+          style={{
+            stroke: "#67D5EE",
+            strokeWidth: width + 1,
+            opacity: 0.95,
+            strokeDasharray: "3 9",
+            animation: "vg-flow 1.4s linear infinite",
+          }}
+        />
+      ) : null}
       {selected ? (
         <EdgeLabelRenderer>
           <div
-            className="nodrag nopan pointer-events-none absolute rounded bg-card/90 px-1.5 py-0.5 text-[10px] shadow"
+            className="nodrag nopan pointer-events-none absolute border border-water/25 bg-[#0c0c0c]/95 px-2 py-1 font-mono text-[9px] text-water shadow-xl"
             style={{
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
             }}

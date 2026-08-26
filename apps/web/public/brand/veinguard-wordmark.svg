@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 48" fill="none">
+  <path d="M14 10 28 24 14 38M28 24l18-14M28 24l18 14" stroke="#49C6E5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="28" cy="24" r="3.4" fill="#050505" stroke="#BAE6FD" stroke-width="2"/>
+  <text x="64" y="32" fill="#FAFAFA" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="300" letter-spacing="5">VEINGUARD</text>
+</svg>

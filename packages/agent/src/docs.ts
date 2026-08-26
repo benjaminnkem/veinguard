@@ -1,27 +1,17 @@
-export const GROQ_CHAT_PATH = "/openai/v1/chat/completions";
-export const GROQ_API_HOST = "https://api.groq.com";
-export const GROQ_PAGES_CONSULTED = [
-  "https://console.groq.com/docs/models",
-  "https://console.groq.com/docs/deprecations",
-  "https://console.groq.com/docs/tool-use/overview",
-  "https://console.groq.com/docs/tool-use/local-tool-calling",
-  "https://console.groq.com/docs/structured-outputs",
-  "https://console.groq.com/docs/rate-limits",
+export const GEMINI_API_HOST = "https://generativelanguage.googleapis.com";
+export const GEMINI_API_VERSION = "v1beta";
+export const GEMINI_PAGES_CONSULTED = [
+  "https://ai.google.dev/api/generate-content",
+  "https://ai.google.dev/gemini-api/docs/function-calling",
+  "https://ai.google.dev/gemini-api/docs/models",
+  "https://ai.google.dev/gemini-api/docs/rate-limits",
+  "https://ai.google.dev/gemini-api/docs/deprecations",
 ] as const;
 
-export const DEFAULT_GROQ_MODEL = "openai/gpt-oss-20b";
-
-/** Shutdown 2026-08-16 for free/developer tier. Live docs win. */
-export const RETIRED_GROQ_MODELS = new Set([
-  "llama-3.1-8b-instant",
-  "llama-3.3-70b-versatile",
-  "llama-3.1-70b-versatile",
-  "llama-3.1-70b-specdec",
-  "llama3-70b-8192",
-  "llama3-8b-8192",
-  "llama3-groq-8b-8192-tool-use-preview",
-  "llama3-groq-70b-8192-tool-use-preview",
-]);
+export const DEFAULT_GEMINI_MODEL = "gemini-3.6-flash";
+export const DEFAULT_GEMINI_RATE_LIMIT_COOLDOWN_MS = 60_000;
+export const DEFAULT_GEMINI_HTTP_TIMEOUT_MS = 60_000;
+export const DEFAULT_GEMINI_MAX_OUTPUT_TOKENS = 768;
 
 export const DEFAULT_CONTEXT_MAX_BYTES = 24_000;
 export const DEFAULT_TOOL_RESULT_MAX_BYTES = 4_000;

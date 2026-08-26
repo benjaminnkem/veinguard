@@ -38,7 +38,7 @@ export interface LabContext {
     }>;
   };
   notices: { actuation: string; heat: string; time: string };
-  groqConfigured: boolean;
+  geminiConfigured: boolean;
   disclosure: string;
 }
 
@@ -157,9 +157,7 @@ export async function fetchScenario(id: string): Promise<ScenarioRecord> {
   return data;
 }
 
-export async function compareScenarios(
-  scenarioRunIds: string[],
-): Promise<ComparisonResult> {
+export async function compareScenarios(scenarioRunIds: string[]): Promise<ComparisonResult> {
   const { data } = await api.post<ComparisonResult>("/lab/scenarios/compare", {
     scenarioRunIds,
   });

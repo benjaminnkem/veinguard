@@ -55,9 +55,9 @@ Use:
 
 Do not copy unexplained formulas/constants from blogs.
 
-### 5. Groq is not the physics engine
+### 5. Gemini is not the physics engine
 
-Groq may:
+Gemini may:
 
 - interpret an operator goal;
 - request compact system context;
@@ -65,7 +65,7 @@ Groq may:
 - decide which simulation tool to call;
 - summarize deterministic results.
 
-Groq must not:
+Gemini must not:
 
 - calculate hydraulics;
 - invent residual values;
@@ -168,7 +168,7 @@ Before adding packages:
 - React Flow;
 - TanStack Query;
 - Zustand only for justified local transient state;
-- no direct FortyGuard/Groq secrets or calls.
+- no direct FortyGuard/Gemini secrets or calls.
 
 ### `apps/api`
 
@@ -266,22 +266,27 @@ Version separately:
 
 Any change capable of changing numerical outputs requires regression review and model-version bump.
 
-## Groq rules
+## Gemini rules
 
 Default candidate at handoff:
 
 ```text
-openai/gpt-oss-20b
+gemini-3.6-flash
 ```
 
-Must remain configurable with `GROQ_MODEL`.
+Must remain configurable with `GEMINI_MODEL`.
+
+The worker accepts `GEMINI_API_KEY_1` through `GEMINI_API_KEY_4` in priority
+order. A Gemini 429 or quota-exhaustion response may advance to the next key,
+with a bounded per-turn attempt count. Keys remain server-only.
 
 Before deployment re-read:
 
-- https://console.groq.com/docs/models
-- https://console.groq.com/docs/deprecations
-- https://console.groq.com/docs/tool-use/overview
-- https://console.groq.com/docs/rate-limits
+- https://ai.google.dev/api/generate-content
+- https://ai.google.dev/gemini-api/docs/function-calling
+- https://ai.google.dev/gemini-api/docs/models
+- https://ai.google.dev/gemini-api/docs/rate-limits
+- https://ai.google.dev/gemini-api/docs/deprecations
 
 Use local tool calling. Keep tool sets small. Validate every argument.
 

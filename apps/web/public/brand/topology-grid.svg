@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" fill="none">
+  <g stroke="#FFFFFF" stroke-opacity=".09" stroke-width="1"><path d="M0 40h320M0 80h320M0 120h320M0 160h320M0 200h320M0 240h320M0 280h320"/><path d="M40 0v320M80 0v320M120 0v320M160 0v320M200 0v320M240 0v320M280 0v320"/></g>
+  <g fill="#49C6E5" fill-opacity=".23"><circle cx="40" cy="40" r="2"/><circle cx="160" cy="120" r="2"/><circle cx="240" cy="200" r="2"/><circle cx="280" cy="80" r="2"/></g>
+</svg>

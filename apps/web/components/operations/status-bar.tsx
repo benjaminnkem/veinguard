@@ -11,7 +11,7 @@ export function StatusBar({
 }) {
   if (!context) {
     return (
-      <div className="border-b border-border px-4 py-2 text-xs text-muted-foreground">
+      <div className="border-b border-white/10 bg-[#0c0c0c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
         Loading operations context…
       </div>
     );
@@ -30,11 +30,11 @@ export function StatusBar({
     { label: "Simulation", value: context.simulation.status },
   ];
   return (
-    <div className="flex flex-wrap gap-x-6 gap-y-1 border-b border-border px-4 py-2 text-xs">
+    <div className="flex flex-wrap gap-x-6 gap-y-2 border-b border-white/10 bg-[#0c0c0c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.08em]">
       {items.map((item) => (
         <p key={item.label}>
           <span className="text-muted-foreground">{item.label}: </span>
-          <span className="font-medium">{item.value}</span>
+          <span className="font-medium text-zinc-200">{item.value}</span>
           {item.extra ? (
             <span className="text-muted-foreground"> · {item.extra}</span>
           ) : null}

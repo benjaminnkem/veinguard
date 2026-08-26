@@ -10,10 +10,10 @@ import {
   type AgentEventView,
 } from "@/lib/lab";
 
-export function AgentPanel({ groqConfigured }: { groqConfigured: boolean }) {
+export function AgentPanel({ geminiConfigured }: { geminiConfigured: boolean }) {
   const queryClient = useQueryClient();
   const [goal, setGoal] = useState(
-    "Protect the projected target-breach junction through the selected hour without flushing.",
+    "Protect the projected target-breach junction over the configured simulation horizon without flushing.",
   );
   const [noFlush, setNoFlush] = useState(true);
   const [agentRunId, setAgentRunId] = useState<string | null>(null);
@@ -32,8 +32,7 @@ export function AgentPanel({ groqConfigured }: { groqConfigured: boolean }) {
   }, [noFlush]);
 
   const start = useMutation({
-    mutationFn: () =>
-      startLabAgent({ goal, structuredConstraints: constraints }),
+    mutationFn: () => startLabAgent({ goal, structuredConstraints: constraints }),
     onSuccess: (data) => {
       setAgentRunId(data.agentRunId);
       setEvents([]);
@@ -95,12 +94,12 @@ export function AgentPanel({ groqConfigured }: { groqConfigured: boolean }) {
     <div className="flex flex-col gap-3 text-xs">
       <h2 className="font-semibold">Operations agent</h2>
       <p className="text-muted-foreground">
-        Groq proposes typed candidates only. Ranking is deterministic. No
-        chain-of-thought is shown.
+        Gemini proposes typed candidates only. Ranking is deterministic. No chain-of-thought is
+        shown.
       </p>
-      {!groqConfigured ? (
+      {!geminiConfigured ? (
         <p role="status" className="rounded-md border border-border px-2 py-1">
-          Groq is not configured. Manual scenario mode remains available.
+          Gemini is not configured. Manual scenario mode remains available.
         </p>
       ) : null}
       <label className="flex flex-col gap-1">
@@ -117,7 +116,7 @@ export function AgentPanel({ groqConfigured }: { groqConfigured: boolean }) {
           selected={noFlush}
           onClick={() => setNoFlush((value) => !value)}
         />
-        <Chip label="Until selected hour" selected />
+        <Chip label="Configured horizon" selected />
         <Chip label="Network (EPA Net3)" selected />
       </div>
       {error ? (
@@ -127,7 +126,7 @@ export function AgentPanel({ groqConfigured }: { groqConfigured: boolean }) {
       ) : null}
       <button
         type="button"
-        disabled={!groqConfigured || start.isPending}
+        disabled={!geminiConfigured || start.isPending}
         className="rounded-md bg-accent px-3 py-1.5 font-medium disabled:text-muted-foreground"
         onClick={() => start.mutate()}
       >
@@ -139,9 +138,7 @@ export function AgentPanel({ groqConfigured }: { groqConfigured: boolean }) {
             Status: <span className="font-medium">{run.status}</span>
             {run.outcome ? ` · ${run.outcome}` : ""}
           </p>
-          {run.rationale ? (
-            <p className="mt-1 text-muted-foreground">{run.rationale}</p>
-          ) : null}
+          {run.rationale ? <p className="mt-1 text-muted-foreground">{run.rationale}</p> : null}
         </section>
       ) : null}
       <ol className="max-h-48 space-y-1 overflow-auto">

@@ -42,4 +42,4 @@ replace_placeholder "$root/apps/api/.env" "SIMULATION_SERVICE_TOKEN" "$service_t
 replace_placeholder "$root/apps/worker/.env" "SIMULATION_SERVICE_TOKEN" "$service_token"
 replace_placeholder "$root/services/simulation/.env" "SERVICE_TOKEN" "$service_token"
 
-echo "Env files are ready. Add FORTYGUARD_API_KEY and GROQ_API_KEY locally; do not commit them."
+echo "Env files are ready. Add FORTYGUARD_API_KEY and GEMINI_API_KEY_1..4 locally; do not commit them."

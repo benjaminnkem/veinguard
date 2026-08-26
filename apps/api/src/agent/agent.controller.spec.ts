@@ -81,11 +81,11 @@ describe('AgentController', () => {
     });
   });
 
-  it('returns 503 when Groq is unavailable', async () => {
+  it('returns 503 when Gemini is unavailable', async () => {
     agent.create.mockRejectedValue(
       new AgentError(
         'UNAVAILABLE',
-        'Groq is not configured. The operations agent is unavailable.',
+        'Gemini is not configured. The operations agent is unavailable.',
       ),
     );
     const { response } = mockResponse();

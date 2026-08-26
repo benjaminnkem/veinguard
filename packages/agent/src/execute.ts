@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { INTERVENTION_TYPES } from "@repo/contracts";
 import { compareScenarios } from "./compare";
 import { rejectForbiddenInterventions } from "./constraints";
 import { hashValue } from "./hash";
@@ -47,7 +48,7 @@ export class ToolSession {
     }
     const parsedArgs = parseToolArgs(name, parsed);
     if (!parsedArgs.ok) {
-      return fail(name, parsed, "Tool arguments failed schema validation.");
+      return fail(name, parsed, parsedArgs.message);
     }
     switch (parsedArgs.name) {
       case "get_zone_state":
@@ -76,7 +77,12 @@ export class ToolSession {
           `Loaded thermal context for ${parsedArgs.args.zoneId}.`,
         );
       case "get_baseline_summary":
-        return ok(parsedArgs.name, parsedArgs.args, this.baselineSummary(), "Loaded compact baseline summary.");
+        return ok(
+          parsedArgs.name,
+          parsedArgs.args,
+          this.baselineSummary(),
+          "Loaded compact baseline summary.",
+        );
       case "simulate_scenario":
         return this.simulate(parsedArgs.args);
       case "get_scenario_result":
@@ -133,7 +139,9 @@ export class ToolSession {
     const zone = this.zone(zoneId);
     const baseline = this.baseline();
     if (!zone || !baseline) {
-      return { error: { code: "VALIDATION_FAILED", message: "Baseline thermal context is not available." } };
+      return {
+        error: { code: "VALIDATION_FAILED", message: "Baseline thermal context is not available." },
+      };
     }
     return {
       zoneId: zone.zoneId,
@@ -147,7 +155,9 @@ export class ToolSession {
   private baselineSummary(): Record<string, unknown> {
     const baseline = this.baseline();
     if (!baseline) {
-      return { error: { code: "VALIDATION_FAILED", message: "Baseline summary is not available." } };
+      return {
+        error: { code: "VALIDATION_FAILED", message: "Baseline summary is not available." },
+      };
     }
     return {
       baselineRunId: baseline.baselineRunId,
@@ -201,7 +211,10 @@ export class ToolSession {
         "AGENT_LIMIT_REACHED",
       );
     }
-    const forbidden = rejectForbiddenInterventions(args.interventions, this.run.structuredConstraints);
+    const forbidden = rejectForbiddenInterventions(
+      args.interventions,
+      this.run.structuredConstraints,
+    );
     if (!forbidden.ok) {
       return {
         ...fail("simulate_scenario", args, forbidden.message, "SCENARIO_INVALID_INTERVENTION"),
@@ -212,7 +225,8 @@ export class ToolSession {
     const scenarioRunId = randomUUID();
     try {
       const result = await this.simulation.runScenario({
-        networkId: this.run.structuredConstraints.networkId ?? this.baseline()?.networkId ?? "epa-net3",
+        networkId:
+          this.run.structuredConstraints.networkId ?? this.baseline()?.networkId ?? "epa-net3",
         horizonStart: this.run.structuredConstraints.horizonStart ?? "1970-01-01T00:00:00+00:00",
         interventions: args.interventions,
         sampleTimeSeconds: this.run.structuredConstraints.sampleTimeSeconds,
@@ -254,7 +268,12 @@ export class ToolSession {
     if (!found) {
       return fail("get_scenario_result", { scenarioRunId }, "Unknown scenarioRunId.");
     }
-    return ok("get_scenario_result", { scenarioRunId }, compactScenario(found), "Loaded scenario result.");
+    return ok(
+      "get_scenario_result",
+      { scenarioRunId },
+      compactScenario(found),
+      "Loaded scenario result.",
+    );
   }
 
   private compare(scenarioRunIds?: string[]): ToolExecution {
@@ -353,14 +372,36 @@ type ParsedToolArgs =
     }
   | { ok: true; name: "get_scenario_result"; args: { scenarioRunId: string } }
   | { ok: true; name: "compare_feasible_scenarios"; args: { scenarioRunIds?: string[] } }
-  | { ok: false };
+  | { ok: false; message: string };
 
 function parseToolArgs(name: keyof typeof toolArgSchemas, parsed: unknown): ParsedToolArgs {
   const checked = toolArgSchemas[name].safeParse(parsed);
   if (!checked.success) {
-    return { ok: false };
+    return { ok: false, message: schemaFailureMessage(name, parsed) };
   }
   return { ok: true, name, args: checked.data } as ParsedToolArgs;
+}
+
+function schemaFailureMessage(name: keyof typeof toolArgSchemas, parsed: unknown): string {
+  if (name !== "simulate_scenario") {
+    return "Tool arguments failed schema validation.";
+  }
+  const interventions =
+    parsed &&
+    typeof parsed === "object" &&
+    Array.isArray((parsed as { interventions?: unknown }).interventions)
+      ? (parsed as { interventions: unknown[] }).interventions
+      : [];
+  for (const item of interventions) {
+    if (!item || typeof item !== "object") {
+      continue;
+    }
+    const type = (item as { type?: unknown }).type;
+    if (typeof type === "string" && !(INTERVENTION_TYPES as readonly string[]).includes(type)) {
+      return `Unsupported intervention type '${type}'. Use one of ${INTERVENTION_TYPES.join(", ")}.`;
+    }
+  }
+  return "Invalid simulate_scenario arguments. Use a supported intervention shape with required IDs, ISO-8601 times, and numeric values. CHANGE_BOOSTER_PROFILE supports CONCENTRATION only; MASS is unavailable in V1.";
 }
 
 function fail(
@@ -378,5 +419,3 @@ function fail(
     displayMessage: message,
   };
 }
-
-

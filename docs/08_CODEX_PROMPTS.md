@@ -40,7 +40,7 @@ Whenever implementing/changing FortyGuard, read https://docs-api.fortyguard.com/
 
 Also check current primary/official docs for:
 - EPA EPANET/WNTR and EPANET-MSX if used
-- Groq models/tool use/deprecations/rate limits
+- Gemini models/tool use/deprecations/rate limits
 - Next.js
 - NestJS
 - MongoDB
@@ -144,7 +144,7 @@ Implement:
 - invalid network tests
 - WNTR/EPANET engine version reporting
 
-Do not implement FortyGuard, Groq or chemistry yet.
+Do not implement FortyGuard, Gemini or chemistry yet.
 Do not generate fake hydraulic data.
 
 Run full Python test suite and relevant contract tests.
@@ -438,12 +438,12 @@ End with phase report and Prompt 10.
 
 ---
 
-# Prompt 10 — Groq agent
+# Prompt 10 — Gemini agent
 
 ```text
 Proceed with Phase 10 only.
 
-Before coding, read current official Groq:
+Before coding, read current official Gemini:
 - Models
 - Deprecations
 - Tool Use/local tool calling
@@ -452,7 +452,7 @@ Before coding, read current official Groq:
 
 Do not use a retired model.
 
-Use GROQ_MODEL configuration. Current handoff candidate is openai/gpt-oss-20b, but live docs win.
+Use GEMINI_MODEL configuration. Current handoff candidate is gemini-3.6-flash, but live docs win.
 
 Build bounded VeinGuard operations agent.
 
@@ -485,7 +485,7 @@ goal
 -> real simulations
 -> deterministic hard constraints/objective
 -> selected result
--> Groq concise explanation
+-> Gemini concise explanation
 
 Persist goal, tool names, validated args, result summaries/hashes, scenario IDs, selected scenario and concise rationale.
 
@@ -496,14 +496,14 @@ Add agent evaluations:
 - impossible goal/no feasible plan
 - malformed tool args
 - simulation failure
-- Groq 429/timeout
+- Gemini 429/timeout
 - step limit
 - simulation limit
 - hard-constraint rejection
 - prompt asking to bypass constraints
 - prompt asking for real actuation
 
-Manual scenarios must work if Groq is unavailable.
+Manual scenarios must work if Gemini is unavailable.
 
 End with phase report and Prompt 11.
 ```
@@ -712,7 +712,7 @@ End with phase report and Prompt 16.
 ```text
 Proceed with Phase 16 and final handoff.
 
-First re-check current official FortyGuard and Groq docs/deprecations.
+First re-check current official FortyGuard and Gemini docs/deprecations.
 
 Configure the selected zero-cost hackathon deployment and document a separate production topology.
 
@@ -728,7 +728,7 @@ Run as much of the full flow as credentials permit:
 7. actual target-breach scenario if a real selected event/model produces one
 8. manual interventions
 9. actual hard-constraint rejection case
-10. Groq goal/tool loop
+10. Gemini goal/tool loop
 11. deterministic selected scenario
 12. before/after
 13. provenance
@@ -769,7 +769,7 @@ F. How to test EACH integration:
 - Free Chlorine
 - Monochloramine
 - nitrification conditions
-- Groq
+- Gemini
 - queues
 - Operations map
 - Digital Twin

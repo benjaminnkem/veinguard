@@ -384,7 +384,7 @@ Simulation failure:
 - input invalid;
 - model domain.
 
-Groq failure:
+Gemini failure:
 > AI assistance unavailable. Manual scenario simulation remains available.
 
 # 22. Accessibility

@@ -14,7 +14,7 @@ It combines:
 2. a **real EPANET 2.2 hydraulic/water-quality simulation** through EPA/WNTR tooling;
 3. deterministic **water-temperature and disinfectant chemistry models**;
 4. deterministic **operational constraints and scenario scoring**; and
-5. a **Groq-powered AI operations agent** that investigates and proposes typed scenarios.
+5. a **Gemini-powered AI operations agent** that investigates and proposes typed scenarios.
 
 The core product question is:
 
@@ -26,7 +26,7 @@ There must be **no fake runtime fallback data** in required flows.
 
 - FortyGuard unavailable + no exact previously fetched real cache => show thermal data unavailable.
 - EPANET failure => simulation fails visibly.
-- Groq unavailable => manual scenarios still work; no canned AI response.
+- Gemini unavailable => manual scenarios still work; no canned AI response.
 - No random risk scores.
 - Test doubles are allowed in unit tests only.
 
@@ -50,7 +50,7 @@ If its non-geographic coordinates are placed inside a FortyGuard AOI, that is **
 | Free chlorine residual | Deterministic validated chemistry + transport calculation |
 | Monochloramine residual | Deterministic validated chemistry + transport calculation |
 | Nitrification V1 | Conditions/risk indicator, not a microbial concentration prediction |
-| Groq recommendation | AI decision support over typed tools |
+| Gemini recommendation | AI decision support over typed tools |
 | Real pump/valve actuation | Out of V1 scope |
 
 ## Product surfaces
@@ -181,12 +181,12 @@ The product is not demo-ready until this works end to end:
 6. Run selected Free Chlorine or Monochloramine profile.
 7. Detect configured target breach if the real scenario produces one.
 8. Operator asks e.g. **"Protect Zone C through midnight without flushing."**
-9. Groq returns typed tool calls/candidate plans.
+9. Gemini returns typed tool calls/candidate plans.
 10. Backend validates candidate constraints before simulation.
 11. Actual EPANET/scientific simulations run.
 12. Hard-constraint failures are rejected.
 13. Deterministic objective chooses best feasible candidate.
-14. Groq explains the deterministic selection.
+14. Gemini explains the deterministic selection.
 15. UI shows before/after and provenance.
 16. Heat remains unchanged between before/after; the water-network state changes.
 

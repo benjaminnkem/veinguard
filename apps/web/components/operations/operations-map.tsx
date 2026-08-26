@@ -2,6 +2,7 @@
 
 import {
   Map as MapLibreMap,
+  LngLatBounds,
   NavigationControl,
   setWorkerUrl,
   type GeoJSONSource,
@@ -9,7 +10,7 @@ import {
 } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 import { useMapStyle } from "@/lib/use-map-style";
-import type { OperationsLayer } from "@/lib/operations";
+import type { GeoJsonCollection, OperationsLayer } from "@/lib/operations";
 import "maplibre-gl/dist/maplibre-gl.css";
 
 // Next.js Turbopack does not emit maplibre-gl-shared.mjs next to the worker.
@@ -18,14 +19,14 @@ setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
 
 interface OperationsMapProps {
   quantLayer: OperationsLayer;
-  quantData: unknown;
-  networkData: unknown;
-  assetData: unknown;
+  quantData: GeoJsonCollection;
+  networkData: GeoJsonCollection | null;
+  assetData: GeoJsonCollection | null;
   selectedId: string | null;
   onSelect: (id: string) => void;
 }
 
-const EMPTY = { type: "FeatureCollection", features: [] };
+const EMPTY: GeoJsonCollection = { type: "FeatureCollection", features: [] };
 
 export function OperationsMap({
   quantLayer,
@@ -37,7 +38,13 @@ export function OperationsMap({
 }: OperationsMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const selectedRef = useRef<string | null>(null);
+  const fittedNetworkRef = useRef(false);
   const onSelectRef = useRef(onSelect);
+  const quantDataRef = useRef(quantData);
+  const quantLayerRef = useRef(quantLayer);
+  const networkDataRef = useRef(networkData);
+  const assetDataRef = useRef(assetData);
   const { styleUrl } = useMapStyle();
   const [ready, setReady] = useState(0);
   const [mapError, setMapError] = useState<string | null>(null);
@@ -45,6 +52,13 @@ export function OperationsMap({
   useEffect(() => {
     onSelectRef.current = onSelect;
   }, [onSelect]);
+
+  useEffect(() => {
+    quantDataRef.current = quantData;
+    quantLayerRef.current = quantLayer;
+    networkDataRef.current = networkData;
+    assetDataRef.current = assetData;
+  }, [assetData, networkData, quantData, quantLayer]);
 
   useEffect(() => {
     const el = container.current;
@@ -68,19 +82,35 @@ export function OperationsMap({
         "bottom-right",
       );
       instance.on("error", (event) => {
-        const message =
-          event.error instanceof Error
-            ? event.error.message
-            : "Map failed to load the basemap style.";
-        setMapError(message);
+        // Do not surface a style-provider response verbatim. It can be noisy,
+        // provider-specific, and is not an actionable operator message.
+        if (event.error) {
+          setMapError(
+            "Basemap unavailable. Network overlays may be unavailable until the map reconnects.",
+          );
+        }
       });
       instance.on("load", () => {
         if (cancelled) {
           return;
         }
+        styleBasemap(instance);
         addOverlayLayers(instance, onSelectRef);
+        hydrateOverlaySources(
+          instance,
+          quantLayerRef.current,
+          quantDataRef.current,
+          networkDataRef.current,
+          assetDataRef.current,
+        );
         instance.resize();
         setReady((value) => value + 1);
+        // Some third-party styles finish their initial style work after `load`.
+        // Trigger a second source sync once MapLibre is idle so initial query
+        // results are not contingent on a later user layer change.
+        instance.once("idle", () => {
+          if (!cancelled) setReady((value) => value + 1);
+        });
       });
       return instance;
     };
@@ -120,8 +150,8 @@ export function OperationsMap({
     if (!tcm || !fill || !line || !point) {
       return;
     }
-    const empty = EMPTY as never;
-    const data = (quantData ?? EMPTY) as never;
+    const empty = EMPTY;
+    const data = quantData;
     if (quantLayer === "tcm") {
       tcm.setData(data);
       fill.setData(empty);
@@ -155,9 +185,21 @@ export function OperationsMap({
     }
     const source = map.getSource("vg-network") as GeoJSONSource | undefined;
     if (source) {
-      source.setData((networkData ?? EMPTY) as never);
+      source.setData(networkData ?? EMPTY);
+      if (networkData && !fittedNetworkRef.current) {
+        const bounds = boundsForCollection(networkData);
+        if (bounds) {
+          map.fitBounds(bounds, {
+            padding: { top: 72, right: 56, bottom: 56, left: 56 },
+            duration: 0,
+            maxZoom: 16.5,
+          });
+          fittedNetworkRef.current = true;
+        }
+      }
     }
     setLayerVisibility(map, "vg-network-line", Boolean(networkData));
+    setLayerVisibility(map, "vg-network-casing", Boolean(networkData));
   }, [networkData, ready]);
 
   useEffect(() => {
@@ -167,9 +209,10 @@ export function OperationsMap({
     }
     const source = map.getSource("vg-assets") as GeoJSONSource | undefined;
     if (source) {
-      source.setData((assetData ?? EMPTY) as never);
+      source.setData(assetData ?? EMPTY);
     }
     setLayerVisibility(map, "vg-assets", Boolean(assetData));
+    setLayerVisibility(map, "vg-assets-glyph", Boolean(assetData));
   }, [assetData, ready]);
 
   useEffect(() => {
@@ -177,14 +220,17 @@ export function OperationsMap({
     if (!ready || !map?.isStyleLoaded() || !map.getSource("vg-assets")) {
       return;
     }
-    map.setFeatureState(
-      { source: "vg-assets", id: selectedId ?? "" },
-      { selected: true },
-    );
+    if (selectedRef.current) {
+      map.setFeatureState({ source: "vg-assets", id: selectedRef.current }, { selected: false });
+    }
+    if (selectedId) {
+      map.setFeatureState({ source: "vg-assets", id: selectedId }, { selected: true });
+    }
+    selectedRef.current = selectedId;
   }, [selectedId, ready]);
 
   return (
-    <div className="absolute inset-0 min-h-[320px] bg-slate-900">
+    <div className="absolute inset-0 min-h-[320px] bg-[#050505]">
       <div
         ref={container}
         className="absolute inset-0"
@@ -199,6 +245,10 @@ export function OperationsMap({
           Map failed: {mapError}
         </p>
       ) : null}
+      <div className="absolute left-3 top-3 z-10 flex items-center gap-1 border border-white/10 bg-[#0c0c0c]/90 p-1 shadow-xl backdrop-blur-sm">
+        <span className="px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-water">MAP / NETWORK STATE</span>
+        <span className="hidden border-l border-white/10 px-2 py-1 font-mono text-[9px] text-zinc-500 sm:inline">FORTYGUARD ↔ MODELED WATER</span>
+      </div>
       <Legend layer={quantLayer} />
     </div>
   );
@@ -208,12 +258,12 @@ function addOverlayLayers(
   map: MapLibreMap,
   onSelectRef: { current: (id: string) => void },
 ): void {
-  map.addSource("vg-tcm", { type: "geojson", data: EMPTY as never });
-  map.addSource("vg-quant-fill", { type: "geojson", data: EMPTY as never });
-  map.addSource("vg-quant-line", { type: "geojson", data: EMPTY as never });
-  map.addSource("vg-quant-point", { type: "geojson", data: EMPTY as never });
-  map.addSource("vg-network", { type: "geojson", data: EMPTY as never });
-  map.addSource("vg-assets", { type: "geojson", data: EMPTY as never });
+  map.addSource("vg-tcm", { type: "geojson", data: EMPTY });
+  map.addSource("vg-quant-fill", { type: "geojson", data: EMPTY });
+  map.addSource("vg-quant-line", { type: "geojson", data: EMPTY });
+  map.addSource("vg-quant-point", { type: "geojson", data: EMPTY });
+  map.addSource("vg-network", { type: "geojson", data: EMPTY });
+  map.addSource("vg-assets", { type: "geojson", data: EMPTY, generateId: true });
   map.addLayer({
     id: "vg-tcm-fill",
     type: "fill",
@@ -230,8 +280,8 @@ function addOverlayLayers(
         33.2,
         "#9b2226",
       ],
-      "fill-opacity": 0.55,
-      "fill-outline-color": "#00000033",
+      "fill-opacity": 0.32,
+      "fill-outline-color": "#F59E0B55",
     },
   });
   map.addLayer({
@@ -242,20 +292,25 @@ function addOverlayLayers(
     paint: { "fill-color": "#888", "fill-opacity": 0.4 },
   });
   map.addLayer({
-    id: "vg-network-line",
+    id: "vg-network-casing",
     type: "line",
     source: "vg-network",
     paint: {
-      "line-color": [
-        "match",
-        ["get", "type"],
-        "PUMP",
-        "#38bdf8",
-        "VALVE",
-        "#a78bfa",
-        "#94a3b8",
-      ],
-      "line-width": ["match", ["get", "type"], "PUMP", 3.5, 1.6],
+      "line-color": "#020303",
+      "line-opacity": 0.96,
+      "line-width": ["interpolate", ["linear"], ["zoom"], 10, 4, 16, 9],
+      "line-blur": 0.4,
+    },
+  });
+  map.addLayer({
+    id: "vg-network-line",
+    type: "line",
+    source: "vg-network",
+    layout: { "line-cap": "round", "line-join": "round" },
+    paint: {
+      "line-color": ["case", ["==", ["get", "type"], "PUMP"], "#67D5EE", ["==", ["get", "type"], "VALVE"], "#BAE6FD", "#2A454A"],
+      "line-opacity": 0.9,
+      "line-width": ["interpolate", ["linear"], ["zoom"], 10, 0.8, 16, 3.2],
     },
   });
   map.addLayer({
@@ -264,7 +319,9 @@ function addOverlayLayers(
     source: "vg-quant-line",
     layout: { visibility: "none" },
     paint: {
-      "line-width": 2.4,
+      "line-width": ["interpolate", ["linear"], ["zoom"], 10, 1, 16, 4],
+      "line-dasharray": [1.1, 1.8],
+      "line-opacity": 0.84,
       "line-color": [
         "interpolate",
         ["linear"],
@@ -295,36 +352,48 @@ function addOverlayLayers(
     type: "circle",
     source: "vg-assets",
     paint: {
-      "circle-radius": [
+      "circle-radius": ["case", ["boolean", ["feature-state", "selected"], false], 9, ["match", ["get", "type"], "TANK", 7, "RESERVOIR", 7, "JUNCTION", 3.5, 5]],
+      "circle-color": ["match", ["get", "type"], "TANK", "#0EA5C6", "RESERVOIR", "#67D5EE", "JUNCTION", "#E4E4E7", "#F59E0B"],
+      "circle-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 1, 0.9],
+      "circle-stroke-width": ["case", ["boolean", ["feature-state", "selected"], false], 2.5, 1.2],
+      "circle-stroke-color": ["case", ["boolean", ["feature-state", "selected"], false], "#BAE6FD", "#081114"],
+      "circle-stroke-opacity": 0.95,
+    },
+  });
+  map.addLayer({
+    id: "vg-assets-glyph",
+    type: "symbol",
+    source: "vg-assets",
+    layout: {
+      "text-field": [
         "match",
         ["get", "type"],
-        "TANK",
-        7,
-        "RESERVOIR",
-        7,
-        "JUNCTION",
-        3.5,
-        5,
+        "RESERVOIR", "▽",
+        "TANK", "▣",
+        "PUMP", "◆",
+        "VALVE", "⋈",
+        "·",
       ],
-      "circle-color": [
-        "match",
-        ["get", "type"],
-        "TANK",
-        "#22c55e",
-        "RESERVOIR",
-        "#38bdf8",
-        "JUNCTION",
-        "#e2e8f0",
-        "#fbbf24",
+      "text-size": ["match", ["get", "type"], "JUNCTION", 12, 15],
+      "text-allow-overlap": true,
+      "text-ignore-placement": true,
+    },
+    paint: {
+      "text-color": [
+        "case",
+        ["boolean", ["feature-state", "selected"], false],
+        "#050505",
+        ["match", ["get", "type"], "JUNCTION", "#081114", "#E4E4E7"],
       ],
-      "circle-stroke-width": 1.2,
-      "circle-stroke-color": "#0f172a",
+      "text-halo-color": "#050505",
+      "text-halo-width": 0.35,
     },
   });
   const clickLayers = [
     "vg-assets",
     "vg-quant-point",
     "vg-network-line",
+    "vg-network-casing",
     "vg-quant-line",
     "vg-tcm-fill",
   ];
@@ -346,6 +415,32 @@ function addOverlayLayers(
   }
 }
 
+function styleBasemap(map: MapLibreMap): void {
+  for (const layer of map.getStyle().layers ?? []) {
+    try {
+      if (layer.type === "background") {
+        map.setPaintProperty(layer.id, "background-color", "#050505");
+        continue;
+      }
+      if (layer.type === "symbol") {
+        map.setPaintProperty(layer.id, "text-color", "#71717A");
+        map.setPaintProperty(layer.id, "text-halo-color", "#050505");
+        map.setPaintProperty(layer.id, "text-halo-width", 1);
+      }
+      if (layer.type === "line") {
+        map.setPaintProperty(layer.id, "line-color", "#151B1D");
+        map.setPaintProperty(layer.id, "line-opacity", 0.45);
+      }
+      if (layer.type === "fill") {
+        map.setPaintProperty(layer.id, "fill-color", "#080C0D");
+        map.setPaintProperty(layer.id, "fill-opacity", 0.72);
+      }
+    } catch {
+      // Third-party style layers can omit a property; the VeinGuard overlays remain authoritative.
+    }
+  }
+}
+
 function setLayerVisibility(
   map: MapLibreMap,
   layerId: string,
@@ -359,6 +454,62 @@ function setLayerVisibility(
   } catch {
     // Style can still be swapping when the basemap theme changes.
   }
+}
+
+function hydrateOverlaySources(
+  map: MapLibreMap,
+  quantLayer: OperationsLayer,
+  quantData: GeoJsonCollection,
+  networkData: GeoJsonCollection | null,
+  assetData: GeoJsonCollection | null,
+): void {
+  const tcm = map.getSource("vg-tcm") as GeoJSONSource | undefined;
+  const fill = map.getSource("vg-quant-fill") as GeoJSONSource | undefined;
+  const line = map.getSource("vg-quant-line") as GeoJSONSource | undefined;
+  const point = map.getSource("vg-quant-point") as GeoJSONSource | undefined;
+  const network = map.getSource("vg-network") as GeoJSONSource | undefined;
+  const assets = map.getSource("vg-assets") as GeoJSONSource | undefined;
+  if (!tcm || !fill || !line || !point || !network || !assets) return;
+
+  tcm.setData(quantLayer === "tcm" ? quantData : EMPTY);
+  fill.setData(EMPTY);
+  line.setData(quantLayer === "flow" ? quantData : EMPTY);
+  point.setData(quantLayer !== "tcm" && quantLayer !== "flow" ? quantData : EMPTY);
+  network.setData(networkData ?? EMPTY);
+  assets.setData(assetData ?? EMPTY);
+
+  setLayerVisibility(map, "vg-tcm-fill", quantLayer === "tcm");
+  setLayerVisibility(map, "vg-quant-line", quantLayer === "flow");
+  setLayerVisibility(map, "vg-quant-point", quantLayer !== "tcm" && quantLayer !== "flow");
+  setLayerVisibility(map, "vg-network-line", Boolean(networkData));
+  setLayerVisibility(map, "vg-network-casing", Boolean(networkData));
+  setLayerVisibility(map, "vg-assets", Boolean(assetData));
+  setLayerVisibility(map, "vg-assets-glyph", Boolean(assetData));
+  applyPointPaint(map, quantLayer);
+}
+
+function boundsForCollection(collection: GeoJsonCollection): LngLatBounds | null {
+  const bounds = new LngLatBounds();
+  let hasCoordinate = false;
+
+  const visit = (value: unknown): void => {
+    if (!Array.isArray(value)) return;
+    if (
+      value.length >= 2 &&
+      typeof value[0] === "number" &&
+      typeof value[1] === "number"
+    ) {
+      bounds.extend([value[0], value[1]]);
+      hasCoordinate = true;
+      return;
+    }
+    for (const child of value) visit(child);
+  };
+
+  for (const feature of collection.features) {
+    if (feature.geometry) visit(feature.geometry.coordinates);
+  }
+  return hasCoordinate ? bounds : null;
 }
 
 function applyPointPaint(map: MapLibreMap, layer: OperationsLayer): void {

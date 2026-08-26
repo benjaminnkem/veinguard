@@ -1,0 +1,14 @@
+{
+  "sheetsById": {
+    "VeinGuard / Hero": {
+      "staticOverrides": { "byObject": {} },
+      "sequence": {
+        "type": "PositionalSequence",
+        "length": 10,
+        "tracksByObject": {}
+      }
+    }
+  },
+  "definitionVersion": "0.4.0",
+  "revisionHistory": []
+}

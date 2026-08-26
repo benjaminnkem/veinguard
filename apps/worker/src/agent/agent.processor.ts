@@ -4,12 +4,12 @@ import {
   AgentError,
   compactNetworkFromTopology,
   DEFAULT_CONTEXT_MAX_BYTES,
-  GroqHttpClient,
+  GeminiHttpClient,
   HttpSimulationClient,
   MongoAgentStore,
   runAgentLoop,
 } from "@repo/agent";
-import { QUEUE_NAMES, type WorkerEnv } from "@repo/config";
+import { geminiApiKeys, QUEUE_NAMES, type WorkerEnv } from "@repo/config";
 import { UnrecoverableError, type Job } from "bullmq";
 import { MongoClient } from "mongodb";
 import { WORKER_ENV } from "../config/env.module";
@@ -51,12 +51,12 @@ export class AgentProcessor extends WorkerHost {
     }
     await this.setJobStatus(run.id, "RUNNING");
     try {
-      const groq = new GroqHttpClient({
-        apiKey: this.env.GROQ_API_KEY,
-        model: this.env.GROQ_MODEL,
-        timeoutMs: Math.min(this.env.AGENT_TIMEOUT_MS, 30_000),
+      const gemini = new GeminiHttpClient({
+        apiKeys: geminiApiKeys(this.env),
+        model: this.env.GEMINI_MODEL,
+        timeoutMs: Math.min(this.env.AGENT_TIMEOUT_MS, this.env.GEMINI_HTTP_TIMEOUT_MS),
       });
-      groq.assertConfigured();
+      gemini.assertConfigured();
       const simulation = new HttpSimulationClient({
         baseUrl: this.env.SIMULATION_SERVICE_BASE_URL,
         token: this.env.SIMULATION_SERVICE_TOKEN,
@@ -75,7 +75,7 @@ export class AgentProcessor extends WorkerHost {
       }
       const finished = await runAgentLoop({
         run,
-        groq,
+        gemini,
         simulation,
         store,
         limits: {

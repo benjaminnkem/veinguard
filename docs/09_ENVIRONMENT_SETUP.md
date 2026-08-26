@@ -55,8 +55,12 @@ FORTYGUARD_ACTIVITY_TIMEOUT_MS=600000
 FORTYGUARD_HTTP_TIMEOUT_MS=30000
 FORTYGUARD_MAX_AOI_SQ_MI=10
 
-GROQ_API_KEY=
-GROQ_MODEL=openai/gpt-oss-20b
+GEMINI_API_KEY_1=
+GEMINI_API_KEY_2=
+GEMINI_API_KEY_3=
+GEMINI_API_KEY_4=
+GEMINI_MODEL=gemini-3.6-flash
+GEMINI_HTTP_TIMEOUT_MS=60000
 
 AGENT_MAX_STEPS=8
 AGENT_MAX_SIMULATIONS=5
@@ -82,8 +86,12 @@ SIMULATION_SERVICE_TOKEN=
 FORTYGUARD_API_BASE_URL=https://api.fortyguard.com
 FORTYGUARD_API_KEY=
 
-GROQ_API_KEY=
-GROQ_MODEL=openai/gpt-oss-20b
+GEMINI_API_KEY_1=
+GEMINI_API_KEY_2=
+GEMINI_API_KEY_3=
+GEMINI_API_KEY_4=
+GEMINI_MODEL=gemini-3.6-flash
+GEMINI_HTTP_TIMEOUT_MS=60000
 
 FORTYGUARD_POLL_INITIAL_MS=2000
 FORTYGUARD_POLL_MAX_MS=15000
@@ -135,7 +143,7 @@ Model version must also be represented in code/model registry; env alone is not 
 
 ```env
 RUN_LIVE_FORTYGUARD_TESTS=false
-RUN_LIVE_GROQ_TESTS=false
+RUN_LIVE_GEMINI_TESTS=false
 ```
 
 These flags control cost-consuming integration tests only. They are not runtime mock switches.
@@ -168,13 +176,21 @@ FORTYGUARD_API_KEY=
 
 Verify account entitlement in current docs/dashboard.
 
-## Groq
-Create GroqCloud API key:
+## Gemini
+Create Gemini API keys in Google AI Studio. Configure up to four server-side
+keys in priority order; a 429/quota response advances to the next key.
 ```env
-GROQ_API_KEY=
+GEMINI_API_KEY_1=
+GEMINI_API_KEY_2=
+GEMINI_API_KEY_3=
+GEMINI_API_KEY_4=
+GEMINI_MODEL=gemini-3.6-flash
+GEMINI_HTTP_TIMEOUT_MS=60000
 ```
 
-Server/worker only.
+Server/worker only. Google documents many Gemini quotas per project, so keys
+only provide independent rate-limit capacity when they belong to separately
+limited projects.
 
 ## Mongo
 Local: Docker.
@@ -217,5 +233,5 @@ Examples:
 - no Mongo => API not ready;
 - no Redis => worker not ready;
 - no FortyGuard key => thermal acquisition feature unavailable, no fake data;
-- no Groq key => agent unavailable, manual simulation still works;
+- no Gemini key => agent unavailable, manual simulation still works;
 - simulation token mismatch => internal call denied.

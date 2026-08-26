@@ -18,7 +18,7 @@ Simulation service is internal, not a public product API.
 
 Server-only:
 - FortyGuard API key;
-- Groq API key;
+- Gemini API key;
 - Mongo URI;
 - Redis credentials;
 - JWT secrets;
@@ -89,7 +89,7 @@ If POST times out after possible provider acceptance:
 - reconcile if provider supports it;
 - otherwise surface controlled retry decision.
 
-## Groq
+## Gemini
 - timeout;
 - 429 handling;
 - bounded retry;
@@ -233,7 +233,7 @@ Append-oriented. Do not overwrite historical provenance.
 | Mongo down | readiness false; no durable work accepted |
 | Redis down | reads may work; new jobs unavailable |
 | FortyGuard down | exact cached-real if policy permits; otherwise unavailable |
-| Groq down | manual scenario mode works |
+| Gemini down | manual scenario mode works |
 | Simulation down | reads work; new simulations unavailable |
 | EPANET nonconvergence | failed run; no fake values |
 | SSE drop | reconnect/refetch canonical state |
@@ -255,7 +255,7 @@ At minimum:
 - request dedupe;
 - only needed env params;
 - reasonable polling;
-- compact Groq context;
+- compact Gemini context;
 - max agent steps/simulations;
 - bounded resilience;
 - Redis command monitoring.

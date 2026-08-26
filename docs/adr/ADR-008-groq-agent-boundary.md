@@ -1,6 +1,6 @@
 # ADR-008 Groq agent boundary
 
-**Status:** Accepted for V1  
+**Status:** Superseded by ADR-011
 **Date:** 2026-08-19
 
 ## Decision

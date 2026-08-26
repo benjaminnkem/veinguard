@@ -72,7 +72,7 @@ function Shell({
     >
       <Handles />
       <div
-        className={selected ? "ring-2 ring-sky-500 ring-offset-1 ring-offset-background" : ""}
+        className={selected ? "ring-2 ring-water ring-offset-2 ring-offset-[#08090a]" : ""}
         style={{ width, height }}
       >
         {children}
@@ -86,7 +86,7 @@ export function JunctionNode({ data, selected }: NodeProps<JunctionRfNode>) {
   return (
     <Shell data={data} selected={selected} width={14} height={14}>
       <div
-        className="h-full w-full rounded-full"
+        className="h-full w-full rounded-full shadow-[0_0_0_3px_rgba(73,198,229,.08)]"
         style={shapeStyle(data)}
         aria-label={`Junction ${data.sourceId}`}
       />
@@ -110,11 +110,11 @@ export function TankNode({ data, selected }: NodeProps<TankRfNode>) {
   return (
     <Shell data={data} selected={selected} width={26} height={22}>
       <div
-        className="flex h-full w-full flex-col overflow-hidden rounded-sm"
+        className="flex h-full w-full flex-col overflow-hidden rounded-[5px] shadow-[inset_0_0_0_1px_rgba(255,255,255,.12)]"
         style={shapeStyle(data)}
         aria-label={`Tank ${data.sourceId}`}
       >
-        <div className="h-1/3 border-b border-black/20 bg-white/25" />
+        <div className="h-1/3 border-b border-black/20 bg-white/20" />
       </div>
     </Shell>
   );
@@ -125,7 +125,7 @@ export function PumpNode({ data, selected }: NodeProps<PumpRfNode>) {
     <Shell data={data} selected={selected} width={22} height={22}>
       <div className="flex h-full w-full items-center justify-center">
         <div
-          className="h-4 w-4 rotate-45 rounded-[2px]"
+          className="h-4 w-4 rotate-45 rounded-[2px] shadow-[0_0_12px_rgba(73,198,229,.22)]"
           style={shapeStyle(data)}
           aria-label={`Pump ${data.sourceId}`}
         />
@@ -161,6 +161,7 @@ function shapeStyle(data: TwinNodeData): CSSProperties {
   return {
     background: data.fill,
     border: `${data.breach ? 2 : 1}px solid ${data.stroke}`,
+    boxShadow: data.breach ? "0 0 16px rgba(248,113,113,.28)" : undefined,
   };
 }
 

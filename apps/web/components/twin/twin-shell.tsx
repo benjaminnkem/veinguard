@@ -116,16 +116,15 @@ export function TwinShell() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-foreground">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#0c0c0c] px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,.18)]">
         <div className="flex items-center gap-4">
-          <p className="text-sm font-semibold tracking-tight">VeinGuard</p>
           <AppNav current="twin" />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
           <label className="flex items-center gap-2 text-xs">
             <span className="text-muted-foreground">Chemistry</span>
             <select
-              className="rounded-md border border-border bg-card px-2 py-1"
+              className="max-w-[9rem] border border-white/15 bg-[#111214] px-2.5 py-1.5 text-[11px]"
               value={chemistry}
               onChange={(event) =>
                 setChemistry(event.target.value as ChemistryId)
@@ -141,15 +140,15 @@ export function TwinShell() {
           </label>
           <button
             type="button"
-            className="rounded-md border border-border px-2 py-1 text-xs"
+            className="border border-water/25 bg-water/10 px-2.5 py-1.5 text-[11px] text-water"
             onClick={() => setProvenanceOpen(true)}
           >
             Provenance
           </button>
-          <Link href="/setup" className="text-xs text-muted-foreground underline">
+          <Link href="/setup" className="text-[11px] text-muted-foreground hover:text-foreground">
             Setup
           </Link>
-          <ThemeToggle />
+          <span className="hidden sm:inline-flex"><ThemeToggle /></span>
         </div>
       </header>
 
@@ -168,19 +167,19 @@ export function TwinShell() {
 
       <StatusBar context={contextQuery.data ?? null} chemistry={chemistry} />
 
-      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-2 text-xs">
+      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-[#0c0c0c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.1em]">
         <p>
           <span className="text-muted-foreground">Scenario preview: </span>
           <button
             type="button"
-            className={`rounded-md px-2 py-1 ${preview === "before" ? "bg-accent font-medium" : "text-muted-foreground"}`}
+            className={`px-2 py-1 ${preview === "before" ? "bg-water/10 font-medium text-water" : "text-muted-foreground"}`}
             onClick={() => setPreview("before")}
           >
             Before (baseline)
           </button>
           <button
             type="button"
-            className={`rounded-md px-2 py-1 ${preview === "after" ? "bg-accent font-medium" : "text-muted-foreground"}`}
+            className={`px-2 py-1 ${preview === "after" ? "bg-water/10 font-medium text-water" : "text-muted-foreground"}`}
             onClick={() => setPreview("after")}
             aria-pressed={preview === "after"}
           >

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#050505"/><path d="M0 476h215l92-142h190l98 142h204l101-160h300" stroke="#49C6E5" stroke-opacity=".4" stroke-width="3"/><path d="M0 214h282l98 115h205l108-138h507" stroke="#F59E0B" stroke-opacity=".33" stroke-width="2"/>
+  <circle cx="307" cy="334" r="10" fill="#67D5EE"/><circle cx="799" cy="458" r="10" fill="#67D5EE"/>
+  <text x="72" y="110" fill="#71717A" font-family="monospace" font-size="18" letter-spacing="4">HEAT-AWARE WATER NETWORK DIGITAL TWIN</text><text x="72" y="178" fill="#FAFAFA" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="300">MODEL THE HEAT.</text><text x="72" y="246" fill="#49C6E5" font-family="Arial, Helvetica, sans-serif" font-size="64" font-weight="300">TRACE THE NETWORK.</text>
+</svg>

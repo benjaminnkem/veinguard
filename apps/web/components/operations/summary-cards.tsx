@@ -37,14 +37,14 @@ export function SummaryCards({ context }: { context: OperationsContext | null })
     },
   ];
   return (
-    <div className="grid grid-cols-2 gap-2 border-b border-border px-4 py-2 lg:grid-cols-4">
-      {cards.map((card) => (
-        <article key={card.label} className="rounded-md border border-border bg-card px-3 py-2">
-          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+    <div className="grid grid-cols-2 gap-px border-b border-white/10 bg-white/10 px-0 lg:grid-cols-4">
+      {cards.map((card, index) => (
+        <article key={card.label} className="bg-[#0c0c0c] px-4 py-3">
+          <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
             {card.label}
           </p>
-          <p className="mt-1 text-sm font-semibold">{card.value}</p>
-          <p className="text-[11px] text-muted-foreground">{card.note}</p>
+          <p className={`mt-1 text-lg font-light tracking-tight ${index === 0 && context.cards.projectedTargetBreachAssetCount > 0 ? "text-amber-300" : "text-zinc-100"}`}>{card.value}</p>
+          <p className="font-mono text-[9px] text-muted-foreground">{card.note}</p>
         </article>
       ))}
     </div>

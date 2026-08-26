@@ -39,11 +39,7 @@ export function LabShell() {
     queryFn: fetchLabList,
     refetchInterval: (query) => {
       const rows = query.state.data?.scenarios ?? [];
-      return rows.some(
-        (row) => row.status === "QUEUED" || row.status === "RUNNING",
-      )
-        ? 2000
-        : 8000;
+      return rows.some((row) => row.status === "QUEUED" || row.status === "RUNNING") ? 2000 : 8000;
     },
   });
 
@@ -56,8 +52,7 @@ export function LabShell() {
   });
   const run = useMutation({
     mutationFn: runScenario,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: labKeys.list() }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: labKeys.list() }),
   });
   const apply = useMutation({
     mutationFn: applyScenario,
@@ -82,33 +77,39 @@ export function LabShell() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-foreground">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#0c0c0c] px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,.18)]">
         <div className="flex items-center gap-4">
-          <p className="text-sm font-semibold tracking-tight">VeinGuard</p>
           <AppNav current="lab" />
         </div>
-        <div className="flex items-center gap-2">
-          <Link href="/setup" className="text-xs text-muted-foreground underline">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
+          <Link href="/setup" className="text-[11px] text-muted-foreground hover:text-foreground">
             Setup
           </Link>
-          <ThemeToggle />
+          <span className="hidden sm:inline-flex">
+            <ThemeToggle />
+          </span>
         </div>
       </header>
       <StatusBar context={opsQuery.data ?? null} chemistry="FREE_CHLORINE" />
       <div
         role="status"
-        className="border-b border-border bg-accent/40 px-4 py-2 text-xs"
+        className="border-b border-white/10 bg-water/5 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.1em] text-water"
       >
         {contextQuery.data?.notices.actuation} {contextQuery.data?.notices.heat}
       </div>
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <aside className="hidden w-64 shrink-0 overflow-auto border-r border-border p-3 text-xs md:block">
-          <h2 className="mb-2 font-semibold">Branches</h2>
+        <aside className="hidden w-64 shrink-0 overflow-auto border-r border-white/10 bg-[#0c0c0c] p-4 text-xs md:block">
+          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-water">
+            Simulation graph
+          </p>
+          <h2 className="mb-4 mt-1 text-sm font-medium">Branches</h2>
           <button
             type="button"
-            className={`mb-1 block w-full rounded px-2 py-1 text-left ${
-              selectedId === "baseline" ? "bg-accent font-medium" : ""
+            className={`mb-1 block w-full border-l-2 px-3 py-2 text-left ${
+              selectedId === "baseline"
+                ? "border-water bg-water/10 font-medium text-water"
+                : "border-white/10"
             }`}
             onClick={() => setSelectedId("baseline")}
           >
@@ -119,8 +120,10 @@ export function LabShell() {
               <li key={row.id}>
                 <button
                   type="button"
-                  className={`block w-full rounded px-2 py-1 text-left ${
-                    selectedId === row.id ? "bg-accent font-medium" : ""
+                  className={`block w-full border-l-2 px-3 py-2 text-left ${
+                    selectedId === row.id
+                      ? "border-water bg-water/10 font-medium text-water"
+                      : "border-white/10"
                   }`}
                   onClick={() => setSelectedId(row.id)}
                 >
@@ -138,25 +141,23 @@ export function LabShell() {
           <div className="mb-3 flex flex-wrap gap-2">
             <button
               type="button"
-              className={`rounded-md px-2 py-1 ${preview === "before" ? "bg-accent font-medium" : "text-muted-foreground"}`}
+              className={`border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] ${preview === "before" ? "border-water/30 bg-water/10 font-medium text-water" : "border-transparent text-muted-foreground"}`}
               onClick={() => setPreview("before")}
             >
               Before (baseline)
             </button>
             <button
               type="button"
-              className={`rounded-md px-2 py-1 ${preview === "after" ? "bg-accent font-medium" : "text-muted-foreground"}`}
+              className={`border px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] ${preview === "after" ? "border-water/30 bg-water/10 font-medium text-water" : "border-transparent text-muted-foreground"}`}
               onClick={() => setPreview("after")}
             >
               After
             </button>
             <button
               type="button"
-              className="rounded-md border border-border px-2 py-1"
+              className="border border-white/10 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.1em] text-zinc-300"
               disabled={completed.length === 0 || compare.isPending}
-              onClick={() =>
-                compare.mutate(completed.map((row) => row.id))
-              }
+              onClick={() => compare.mutate(completed.map((row) => row.id))}
             >
               Compare completed
             </button>
@@ -164,9 +165,8 @@ export function LabShell() {
 
           {preview === "after" && !selected?.networkState ? (
             <p className="mb-3 rounded-md border border-border bg-card px-3 py-2">
-              After-state is shown only from a completed scenario simulation.
-              FortyGuard heat is unchanged. VeinGuard does not invent an
-              after-state.
+              After-state is shown only from a completed scenario simulation. FortyGuard heat is
+              unchanged. VeinGuard does not invent an after-state.
             </p>
           ) : null}
 
@@ -176,34 +176,30 @@ export function LabShell() {
               value={
                 preview === "after" && selected?.metrics
                   ? String(selected.metrics.targetBreachCount ?? "Not calculated")
-                  : String(
-                      contextQuery.data?.cards.projectedTargetBreachAssetCount ??
-                        "—",
-                    )
+                  : String(contextQuery.data?.cards.projectedTargetBreachAssetCount ?? "—")
               }
             />
             <Metric
               label="Minimum modeled residual"
               value={formatMaybe(
-                preview === "after"
-                  ? null
-                  : contextQuery.data?.cards.minimumModeledResidualMgL,
+                preview === "after" ? null : contextQuery.data?.cards.minimumModeledResidualMgL,
                 "mg/L",
               )}
               note="After uses completed-run metrics only"
             />
             <Metric
               label="Min pressure (sample)"
-              value={pressureValue(preview, selected, contextQuery.data?.cards.minimumSamplePressureM ?? null)}
+              value={pressureValue(
+                preview,
+                selected,
+                contextQuery.data?.cards.minimumSamplePressureM ?? null,
+              )}
             />
             <Metric
               label="Flush volume"
               value={
                 preview === "after" && selected?.metrics
-                  ? formatMaybe(
-                      numberOrNull(selected.metrics.flushWaterLiters),
-                      "L",
-                    )
+                  ? formatMaybe(numberOrNull(selected.metrics.flushWaterLiters), "L")
                   : "0 L (baseline)"
               }
             />
@@ -219,8 +215,8 @@ export function LabShell() {
             />
           ) : (
             <p className="text-muted-foreground">
-              Select a scenario branch or create one. Baseline metrics come from
-              the captured EPA Net3 + FortyGuard snapshot.
+              Select a scenario branch or create one. Baseline metrics come from the captured EPA
+              Net3 + FortyGuard snapshot.
             </p>
           )}
 
@@ -228,14 +224,13 @@ export function LabShell() {
             <section className="mt-4 rounded-md border border-border p-3">
               <h3 className="font-semibold">Deterministic comparison</h3>
               <p className="text-muted-foreground">
-                Best is rank 1 from the objective profile, not Groq.{" "}
-                {compare.data.heatNotice}
+                Best is rank 1 from the objective profile, not Gemini. {compare.data.heatNotice}
               </p>
               <ul className="mt-2 space-y-1">
                 {compare.data.feasible.map((row) => (
                   <li key={row.scenarioRunId}>
-                    Rank {row.rank}: {nameOf(list?.scenarios ?? [], row.scenarioRunId)} ·
-                    objective {row.objective.toPrecision(4)}
+                    Rank {row.rank}: {nameOf(list?.scenarios ?? [], row.scenarioRunId)} · objective{" "}
+                    {row.objective.toPrecision(4)}
                     {row.rank === 1 ? " · BEST FEASIBLE" : ""}
                   </li>
                 ))}
@@ -250,10 +245,7 @@ export function LabShell() {
           ) : null}
 
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link
-              className="rounded-md border border-border px-2 py-1"
-              href="/operations"
-            >
+            <Link className="rounded-md border border-border px-2 py-1" href="/operations">
               Before map
             </Link>
             <Link
@@ -269,7 +261,7 @@ export function LabShell() {
           </div>
         </main>
 
-        <aside className="hidden w-80 shrink-0 overflow-auto border-l border-border p-3 lg:block">
+        <aside className="hidden w-80 shrink-0 overflow-auto border-l border-white/10 bg-[#0c0c0c] p-4 lg:block">
           <div className="mb-3 flex gap-1">
             <button
               type="button"
@@ -296,7 +288,7 @@ export function LabShell() {
             />
           ) : null}
           {tab === "agent" ? (
-            <AgentPanel groqConfigured={Boolean(contextQuery.data?.groqConfigured)} />
+            <AgentPanel geminiConfigured={Boolean(contextQuery.data?.geminiConfigured)} />
           ) : null}
         </aside>
       </div>
@@ -358,12 +350,7 @@ function ScenarioDetail({
           </div>
           <div>
             <dt className="text-muted-foreground">Chemical increment</dt>
-            <dd>
-              {formatMaybe(
-                numberOrNull(scenario.metrics?.chemicalIncrementMg),
-                "mg",
-              )}
-            </dd>
+            <dd>{formatMaybe(numberOrNull(scenario.metrics?.chemicalIncrementMg), "mg")}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Energy delta</dt>
@@ -375,11 +362,7 @@ function ScenarioDetail({
         <button
           type="button"
           className="rounded-md border border-border px-2 py-1"
-          disabled={
-            runPending ||
-            scenario.status === "QUEUED" ||
-            scenario.status === "RUNNING"
-          }
+          disabled={runPending || scenario.status === "QUEUED" || scenario.status === "RUNNING"}
           onClick={onRun}
         >
           {scenario.status === "SUCCEEDED" ? "Re-run" : "Run simulation"}
@@ -387,36 +370,20 @@ function ScenarioDetail({
         <button
           type="button"
           className="rounded-md border border-border px-2 py-1"
-          disabled={
-            applyPending ||
-            scenario.status !== "SUCCEEDED" ||
-            scenario.appliedToTwin
-          }
+          disabled={applyPending || scenario.status !== "SUCCEEDED" || scenario.appliedToTwin}
           onClick={onApply}
         >
-          {scenario.appliedToTwin
-            ? "Applied to Digital Twin"
-            : "Apply to Digital Twin"}
+          {scenario.appliedToTwin ? "Applied to Digital Twin" : "Apply to Digital Twin"}
         </button>
       </div>
     </article>
   );
 }
 
-function Metric({
-  label,
-  value,
-  note,
-}: {
-  label: string;
-  value: string;
-  note?: string;
-}) {
+function Metric({ label, value, note }: { label: string; value: string; note?: string }) {
   return (
     <article className="rounded-md border border-border bg-card px-3 py-2">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
       <p className="mt-1 font-semibold">{value}</p>
       {note ? <p className="text-[11px] text-muted-foreground">{note}</p> : null}
     </article>
@@ -460,9 +427,7 @@ function pressureValue(
     if (sample.length > 0) {
       return formatMaybe(Math.min(...sample), "m");
     }
-    const summary = selected.hydraulics?.summary as
-      | { minPressureM?: number | null }
-      | undefined;
+    const summary = selected.hydraulics?.summary as { minPressureM?: number | null } | undefined;
     return formatMaybe(summary?.minPressureM ?? null, "m");
   }
   return formatMaybe(baseline, "m");

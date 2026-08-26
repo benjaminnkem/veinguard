@@ -1,15 +1,15 @@
 import type { TwinColorBy, TwinNode } from "@/lib/operations";
 
-export const UNKNOWN_FILL = "#94a3b8";
-export const UNKNOWN_STROKE = "#64748b";
-export const BREACH_STROKE = "#b42318";
+export const UNKNOWN_FILL = "#1B2427";
+export const UNKNOWN_STROKE = "#4B6268";
+export const BREACH_STROKE = "#F87171";
 
 const TYPE_FILL: Record<string, string> = {
-  JUNCTION: "#cbd5e1",
-  RESERVOIR: "#0284c7",
-  TANK: "#1d4ed8",
-  PUMP: "#7c3aed",
-  VALVE: "#0f766e",
+  JUNCTION: "#243238",
+  RESERVOIR: "#0EA5C6",
+  TANK: "#075985",
+  PUMP: "#49C6E5",
+  VALVE: "#67D5EE",
 };
 
 export function nodeColors(
@@ -18,7 +18,7 @@ export function nodeColors(
   range: { min: number; max: number } | null,
   target: number | null,
 ): { fill: string; stroke: string } {
-  const stroke = node.projectedTargetBreach ? BREACH_STROKE : "#0f172a";
+  const stroke = node.projectedTargetBreach ? BREACH_STROKE : "#67D5EE";
   if (colorBy === "target") {
     if (node.residualMgL == null && node.type !== "JUNCTION") {
       return { fill: TYPE_FILL[node.type] ?? UNKNOWN_FILL, stroke };
@@ -27,7 +27,7 @@ export function nodeColors(
       return { fill: UNKNOWN_FILL, stroke: UNKNOWN_STROKE };
     }
     return {
-      fill: node.projectedTargetBreach ? "#b42318" : "#64748b",
+      fill: node.projectedTargetBreach ? "#7F1D1D" : "#27383D",
       stroke,
     };
   }
@@ -84,12 +84,12 @@ function normalize(
 
 function sequentialFill(colorBy: TwinColorBy, t: number): string {
   if (colorBy === "residual") {
-    return lerp("#c2410c", "#1e3a8a", t);
+    return lerp("#7F1D1D", "#0EA5C6", t);
   }
   if (colorBy === "water-temperature" || colorBy === "water-age") {
-    return lerp("#fef3c7", "#c2410c", t);
+    return lerp("#BAE6FD", "#F59E0B", t);
   }
-  return lerp("#e2e8f0", "#0f766e", t);
+  return lerp("#E4E4E7", "#0EA5C6", t);
 }
 
 function lerp(a: string, b: string, t: number): string {
