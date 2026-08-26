@@ -26,7 +26,11 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 WORKDIR /workspace
 COPY . .
 
-RUN pnpm install --frozen-lockfile
+# Render runs the compiled Nest processes directly from their app folders.
+# Hoisting keeps transitive runtime modules (for example express, which is
+# required by @nestjs/platform-express) resolvable after the workspace is
+# copied into the final image.
+RUN pnpm install --frozen-lockfile --shamefully-hoist
 RUN pnpm build
 
 RUN python3 -m venv /opt/veinguard-venv \
@@ -53,6 +57,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /workspace
 COPY --from=builder /opt/veinguard-venv /opt/veinguard-venv
 COPY --from=builder --chown=veinguard:veinguard /workspace /workspace
+
+# Fail the image build if the dependency layout cannot resolve the API's
+# runtime entrypoint dependencies from its application directory.
+RUN node -e "require.resolve('express', { paths: ['/workspace/apps/api'] }); require.resolve('@nestjs/platform-express', { paths: ['/workspace/apps/api'] })"
 
 USER veinguard
 
