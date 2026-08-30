@@ -8,8 +8,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     <NextThemesProvider
       attribute="class"
       defaultTheme="dark"
-      enableSystem
+      enableSystem={false}
       disableTransitionOnChange
+      storageKey="veinguard-theme"
     >
       {children}
     </NextThemesProvider>

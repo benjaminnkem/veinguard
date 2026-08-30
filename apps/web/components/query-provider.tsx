@@ -5,8 +5,7 @@ import dynamic from "next/dynamic";
 import { useState, type ReactNode } from "react";
 
 const ReactQueryDevtools = dynamic(
-  () =>
-    import("@tanstack/react-query-devtools").then((mod) => mod.ReactQueryDevtools),
+  () => import("@tanstack/react-query-devtools").then((mod) => mod.ReactQueryDevtools),
   { ssr: false },
 );
 
@@ -27,7 +26,7 @@ export function QueryProvider({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={client}>
       <div className="flex h-full min-h-0 flex-1 flex-col">{children}</div>
-      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+      {/* <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" /> */}
     </QueryClientProvider>
   );
 }
