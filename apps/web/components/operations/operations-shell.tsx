@@ -1,12 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { GeoJSONSource } from "maplibre-gl";
-import { AppNav } from "@/components/app-nav";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { AppHeader, AppSelect, GhostButton } from "@/components/app-chrome";
 import {
   fetchAsset,
   fetchContext,
@@ -29,7 +27,7 @@ const OperationsMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full items-center justify-center bg-accent text-sm text-muted-foreground">
+      <div className="flex h-full items-center justify-center bg-background text-sm text-muted-foreground">
         Loading map…
       </div>
     ),
@@ -61,6 +59,7 @@ export function OperationsShell() {
   const [provenanceOpen, setProvenanceOpen] = useState(false);
   const [layersOpen, setLayersOpen] = useState(true);
   const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [mobilePanel, setMobilePanel] = useState<"layers" | "inspector" | null>(null);
 
   const visibleQuant = useMemo(() => {
     if (quantLayer === "nitrification" && chemistry !== "MONOCHLORAMINE") {
@@ -102,63 +101,42 @@ export function OperationsShell() {
   const layerMessage =
     quantQuery.data?.message ??
     (quantQuery.error instanceof Error ? quantQuery.error.message : null);
+  const twinHref = selectedId
+    ? `/digital-twin?asset=${encodeURIComponent(selectedId)}&chemistry=${chemistry}`
+    : undefined;
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-foreground">
-      <header className="z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#0c0c0c] px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,.18)] lg:px-5">
-        <div className="flex items-center gap-4">
-          <AppNav current="operations" />
-        </div>
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
-          <label className="flex items-center gap-2 text-xs">
-            <span className="text-muted-foreground">Chemistry</span>
-            <select
-              className="max-w-[9rem] border border-white/15 bg-[#111214] px-2.5 py-1.5 text-[11px] text-foreground"
-              value={chemistry}
-              onChange={(event) => {
-                const next = event.target.value as ChemistryId;
-                setChemistry(next);
-                if (
-                  quantLayer === "nitrification" &&
-                  next !== "MONOCHLORAMINE"
-                ) {
-                  setQuantLayer("residual");
-                }
-              }}
-              aria-label="Chemistry profile"
-            >
-              <option value="FREE_CHLORINE">Free Chlorine</option>
-              <option value="MONOCHLORAMINE">Monochloramine</option>
-              <option value="CHLORINE_DIOXIDE" disabled>
-                Chlorine Dioxide (coming soon)
-              </option>
-            </select>
-          </label>
-          <button
-            type="button"
-            className="border border-water/25 bg-water/10 px-2.5 py-1.5 text-[11px] text-water"
-            onClick={() => setProvenanceOpen(true)}
-          >
-            Provenance
-          </button>
-          <Link href="/setup" className="text-[11px] text-muted-foreground hover:text-foreground">
-            Setup
-          </Link>
-          <span className="hidden sm:inline-flex"><ThemeToggle /></span>
-        </div>
-      </header>
+      <AppHeader current="operations">
+        <AppSelect
+          label="Chemistry"
+          value={chemistry}
+          onChange={(next) => {
+            const value = next as ChemistryId;
+            setChemistry(value);
+            if (quantLayer === "nitrification" && value !== "MONOCHLORAMINE") {
+              setQuantLayer("residual");
+            }
+          }}
+        >
+          <option value="FREE_CHLORINE">Free Chlorine</option>
+          <option value="MONOCHLORAMINE">Monochloramine</option>
+          <option value="CHLORINE_DIOXIDE" disabled>
+            Chlorine Dioxide (coming soon)
+          </option>
+        </AppSelect>
+        <GhostButton onClick={() => setProvenanceOpen(true)}>Provenance</GhostButton>
+      </AppHeader>
 
       {contextError ? (
         <div
           role="alert"
-          className="border-b border-amber-700/40 bg-amber-950/30 px-4 py-2 text-sm"
+          className="border-b border-warning/40 bg-warning/10 px-4 py-2 text-sm"
         >
-          Provider or API error:{" "}
           {contextError instanceof Error
             ? contextError.message
             : "Operations data unavailable."}{" "}
-          Manual simulation remains available when configured. No placeholder map
-          values are shown.
+          No placeholder map values are shown.
         </div>
       ) : null}
 
@@ -174,10 +152,7 @@ export function OperationsShell() {
             onToggle={() => setLayersOpen((value) => !value)}
             quantLayer={visibleQuant}
             onQuantLayer={(layer) => {
-              if (
-                layer === "nitrification" &&
-                chemistry !== "MONOCHLORAMINE"
-              ) {
+              if (layer === "nitrification" && chemistry !== "MONOCHLORAMINE") {
                 return;
               }
               setQuantLayer(layer);
@@ -193,9 +168,29 @@ export function OperationsShell() {
         </aside>
         <div className="relative min-h-0 min-w-0 flex-1">
           <div className="pointer-events-none absolute left-3 right-3 top-3 z-20 flex justify-between md:hidden">
-            <div className="pointer-events-auto flex gap-1 border border-white/10 bg-[#0c0c0c]/95 p-1 shadow-xl backdrop-blur-sm">
-              <button type="button" className={`px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] ${layersOpen ? "bg-water/10 text-water" : "text-zinc-400"}`} onClick={() => setLayersOpen((value) => !value)}>Layers</button>
-              <button type="button" className={`px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] ${inspectorOpen ? "bg-water/10 text-water" : "text-zinc-400"}`} onClick={() => setInspectorOpen((value) => !value)}>Inspect</button>
+            <div className="pointer-events-auto flex gap-1 border border-border bg-card/95 p-1 shadow-xl backdrop-blur-sm">
+              <button
+                type="button"
+                className={`px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] ${
+                  mobilePanel === "layers" ? "bg-water/10 text-water" : "text-muted-foreground"
+                }`}
+                onClick={() =>
+                  setMobilePanel((value) => (value === "layers" ? null : "layers"))
+                }
+              >
+                Layers
+              </button>
+              <button
+                type="button"
+                className={`px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] ${
+                  mobilePanel === "inspector" ? "bg-water/10 text-water" : "text-muted-foreground"
+                }`}
+                onClick={() =>
+                  setMobilePanel((value) => (value === "inspector" ? null : "inspector"))
+                }
+              >
+                Inspect
+              </button>
             </div>
           </div>
           <OperationsMap
@@ -206,8 +201,34 @@ export function OperationsShell() {
             onSelect={setSelectedId}
             selectedId={selectedId}
           />
-          {layersOpen ? <div className="absolute left-3 top-14 z-20 max-h-[55%] w-[min(18rem,calc(100%-1.5rem))] overflow-auto border border-white/10 bg-[#0c0c0c]/95 shadow-2xl backdrop-blur-sm md:hidden"><LayerPanel open={layersOpen} onToggle={() => setLayersOpen(false)} quantLayer={visibleQuant} onQuantLayer={setQuantLayer} showNetwork={showNetwork} onShowNetwork={setShowNetwork} showAssets={showAssets} onShowAssets={setShowAssets} chemistry={chemistry} layers={LAYER_META} groups={QUANT_LAYERS} /></div> : null}
-          {inspectorOpen && selectedId ? <div className="absolute bottom-3 left-3 right-3 z-20 max-h-[48%] overflow-auto border border-white/10 bg-[#0c0c0c]/95 shadow-2xl backdrop-blur-sm lg:hidden"><Inspector open onToggle={() => setInspectorOpen(false)} detail={assetQuery.data ?? null} onProvenance={() => setProvenanceOpen(true)} twinHref={selectedId ? `/digital-twin?asset=${encodeURIComponent(selectedId)}&chemistry=${chemistry}` : undefined} /></div> : null}
+          {mobilePanel === "layers" ? (
+            <div className="absolute left-3 top-14 z-20 max-h-[55%] w-[min(18rem,calc(100%-1.5rem))] overflow-auto border border-border bg-card/95 shadow-2xl backdrop-blur-sm md:hidden">
+              <LayerPanel
+                open
+                onToggle={() => setMobilePanel(null)}
+                quantLayer={visibleQuant}
+                onQuantLayer={setQuantLayer}
+                showNetwork={showNetwork}
+                onShowNetwork={setShowNetwork}
+                showAssets={showAssets}
+                onShowAssets={setShowAssets}
+                chemistry={chemistry}
+                layers={LAYER_META}
+                groups={QUANT_LAYERS}
+              />
+            </div>
+          ) : null}
+          {mobilePanel === "inspector" && selectedId ? (
+            <div className="absolute bottom-3 left-3 right-3 z-20 max-h-[48%] overflow-auto border border-border bg-card/95 shadow-2xl backdrop-blur-sm lg:hidden">
+              <Inspector
+                open
+                onToggle={() => setMobilePanel(null)}
+                detail={assetQuery.data ?? null}
+                onProvenance={() => setProvenanceOpen(true)}
+                twinHref={twinHref}
+              />
+            </div>
+          ) : null}
           {layerMessage ? (
             <p className="pointer-events-none absolute left-3 top-3 rounded-md bg-card/90 px-3 py-2 text-xs shadow">
               {layerMessage}
@@ -222,11 +243,7 @@ export function OperationsShell() {
             onToggle={() => setInspectorOpen((value) => !value)}
             detail={selectedId ? (assetQuery.data ?? null) : null}
             onProvenance={() => setProvenanceOpen(true)}
-            twinHref={
-              selectedId
-                ? `/digital-twin?asset=${encodeURIComponent(selectedId)}&chemistry=${chemistry}`
-                : undefined
-            }
+            twinHref={twinHref}
           />
         </aside>
       </div>

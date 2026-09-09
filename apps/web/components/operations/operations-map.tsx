@@ -68,14 +68,24 @@ export function OperationsMap({
     let cancelled = false;
     let map: MapLibreMap | null = null;
 
-    const createMap = (): MapLibreMap => {
+    const createMap = (): MapLibreMap | null => {
       setMapError(null);
-      const instance = new MapLibreMap({
-        container: el,
-        style: styleUrl,
-        center: [-74.01, 40.711],
-        zoom: 14.4,
-      });
+      let instance: MapLibreMap;
+      try {
+        instance = new MapLibreMap({
+          container: el,
+          style: styleUrl,
+          center: [-74.01, 40.711],
+          zoom: 14.4,
+        });
+      } catch (error) {
+        setMapError(
+          error instanceof Error && /webgl/i.test(error.message)
+            ? "Map tiles need WebGL. Overlays and inspector still work in a WebGL-capable browser."
+            : "Basemap failed to start. Network overlays may be unavailable.",
+        );
+        return null;
+      }
       mapRef.current = instance;
       instance.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
       instance.on("error", (event) => {
@@ -223,7 +233,7 @@ export function OperationsMap({
   }, [selectedId, ready]);
 
   return (
-    <div className="absolute inset-0 min-h-[320px] bg-[#050505]">
+    <div className="absolute inset-0 min-h-[320px] bg-background">
       <div
         ref={container}
         className="absolute inset-0"
@@ -238,14 +248,6 @@ export function OperationsMap({
           Map failed: {mapError}
         </p>
       ) : null}
-      <div className="absolute left-3 top-3 z-10 flex items-center gap-1 border border-white/10 bg-[#0c0c0c]/90 p-1 shadow-xl backdrop-blur-sm">
-        <span className="px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-water">
-          MAP / NETWORK STATE
-        </span>
-        <span className="hidden border-l border-white/10 px-2 py-1 font-mono text-[9px] text-zinc-500 sm:inline">
-          FORTYGUARD ↔ MODELED WATER
-        </span>
-      </div>
       <Legend layer={quantLayer} />
     </div>
   );
@@ -624,7 +626,7 @@ function legendFor(layer: OperationsLayer): {
   switch (layer) {
     case "tcm":
       return {
-        title: "FortyGuard TCM (°C) — HISTORICAL captured cells",
+        title: "FortyGuard TCM (°C)",
         rows: [
           { color: "#fff4cc", label: "~31.8 °C" },
           { color: "#f4a261", label: "~32.4 °C" },
@@ -633,7 +635,7 @@ function legendFor(layer: OperationsLayer): {
       };
     case "target":
       return {
-        title: "Projected target breach (configured operational target)",
+        title: "Projected target breach",
         rows: [
           { color: "#ef4444", label: "Projected breach at sample time" },
           { color: "#64748b", label: "At or above configured target" },

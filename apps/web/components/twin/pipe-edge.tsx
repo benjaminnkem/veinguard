@@ -82,7 +82,7 @@ export function PipeEdge({
       {selected ? (
         <EdgeLabelRenderer>
           <div
-            className="nodrag nopan pointer-events-none absolute border border-water/25 bg-[#0c0c0c]/95 px-2 py-1 font-mono text-[9px] text-water shadow-xl"
+            className="nodrag nopan pointer-events-none absolute border border-water/25 bg-card/95 px-2 py-1 font-mono text-[9px] text-water shadow-xl"
             style={{
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
             }}
