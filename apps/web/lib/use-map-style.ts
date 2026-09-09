@@ -14,9 +14,10 @@ export function useMapStyle(): {
   theme: ResolvedMapTheme;
   mounted: boolean;
 } {
-  const { resolvedTheme } = useTheme();
-  const mounted = resolvedTheme != null;
-  const theme: ResolvedMapTheme = resolvedTheme === "light" ? "light" : "dark";
+  const { theme: selectedTheme, resolvedTheme } = useTheme();
+  const mounted = resolvedTheme != null || selectedTheme != null;
+  const theme: ResolvedMapTheme =
+    selectedTheme === "light" || resolvedTheme === "light" ? "light" : "dark";
 
   return {
     styleUrl: mapStyleUrlForTheme(theme),

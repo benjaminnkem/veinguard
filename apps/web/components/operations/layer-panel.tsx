@@ -1,6 +1,12 @@
 "use client";
 
 import type { ChemistryId, OperationsLayer } from "@/lib/operations";
+import {
+  ChoiceButton,
+  SideSection,
+  SidebarHeader,
+  SidebarRail,
+} from "@/components/app-chrome";
 
 interface LayerPanelProps {
   open: boolean;
@@ -12,7 +18,10 @@ interface LayerPanelProps {
   showAssets: boolean;
   onShowAssets: (value: boolean) => void;
   chemistry: ChemistryId;
-  layers: Record<OperationsLayer, { label: string; group: string; chemistry?: string }>;
+  layers: Record<
+    OperationsLayer,
+    { label: string; group: string; chemistry?: string }
+  >;
   groups: OperationsLayer[];
 }
 
@@ -30,17 +39,9 @@ export function LayerPanel({
   groups,
 }: LayerPanelProps) {
   if (!open) {
-    return (
-      <button
-        type="button"
-        className="h-full w-full text-xs"
-        onClick={onToggle}
-        aria-expanded={false}
-      >
-        Layers
-      </button>
-    );
+    return <SidebarRail label="Layers" onOpen={onToggle} />;
   }
+
   const grouped = new Map<string, OperationsLayer[]>();
   for (const id of groups) {
     const meta = layers[id];
@@ -48,58 +49,67 @@ export function LayerPanel({
     list.push(id);
     grouped.set(meta.group, list);
   }
+
   return (
-    <div className="flex h-full flex-col overflow-auto p-3 text-xs">
-      <div className="mb-2 flex items-center justify-between">
-        <h2 className="font-semibold">Layers</h2>
-        <button type="button" onClick={onToggle} className="text-muted-foreground">
-          Hide
-        </button>
-      </div>
-      <p className="mb-3 text-muted-foreground">
-        One quantitative water-quality layer dominates. Network overlay is separate.
-      </p>
-      <label className="mb-2 flex items-center gap-2">
-        <input
-          type="checkbox"
+    <div className="flex h-full flex-col overflow-auto bg-card p-3 text-xs">
+      <SidebarHeader title="Layers" onHide={onToggle} />
+      <SideSection title="Overlay">
+        <ToggleRow
+          label="Network"
           checked={showNetwork}
-          onChange={(event) => onShowNetwork(event.target.checked)}
+          onChange={onShowNetwork}
         />
-        Network overlay
-      </label>
-      <label className="mb-4 flex items-center gap-2">
-        <input
-          type="checkbox"
+        <ToggleRow
+          label="Assets"
           checked={showAssets}
-          onChange={(event) => onShowAssets(event.target.checked)}
+          onChange={onShowAssets}
         />
-        Asset markers
-      </label>
+      </SideSection>
       {[...grouped.entries()].map(([group, ids]) => (
-        <fieldset key={group} className="mb-3">
-          <legend className="mb-1 font-medium text-muted-foreground">{group}</legend>
-          {ids.map((id) => {
-            const meta = layers[id];
-            const disabled =
-              meta.chemistry === "MONOCHLORAMINE" && chemistry !== "MONOCHLORAMINE";
-            return (
-              <label key={id} className="mb-1 flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="quant-layer"
-                  checked={quantLayer === id}
+        <SideSection key={group} title={group}>
+          <div className="overflow-hidden border border-border">
+            {ids.map((id) => {
+              const meta = layers[id];
+              const disabled =
+                meta.chemistry === "MONOCHLORAMINE" &&
+                chemistry !== "MONOCHLORAMINE";
+              return (
+                <ChoiceButton
+                  key={id}
+                  selected={quantLayer === id}
                   disabled={disabled}
-                  onChange={() => onQuantLayer(id)}
-                />
-                <span>
+                  onClick={() => onQuantLayer(id)}
+                >
                   {meta.label}
-                  {disabled ? " (Monochloramine only)" : ""}
-                </span>
-              </label>
-            );
-          })}
-        </fieldset>
+                  {disabled ? " · NH2Cl" : ""}
+                </ChoiceButton>
+              );
+            })}
+          </div>
+        </SideSection>
       ))}
     </div>
+  );
+}
+
+function ToggleRow({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <label className="mb-1 flex cursor-pointer items-center justify-between gap-2 px-0.5 py-1">
+      <span>{label}</span>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className="accent-[var(--vg-water)]"
+      />
+    </label>
   );
 }
