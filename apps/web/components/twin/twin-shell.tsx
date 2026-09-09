@@ -1,17 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AppNav } from "@/components/app-nav";
+import { AppHeader, AppSelect, GhostButton } from "@/components/app-chrome";
 import { Inspector } from "@/components/operations/inspector";
 import { ProvenanceDrawer } from "@/components/operations/provenance-drawer";
 import { StatusBar } from "@/components/operations/status-bar";
 import { Timeline } from "@/components/operations/timeline";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { fetchApplied, labKeys } from "@/lib/lab";
+import { LegendPanel } from "./legend-panel";
 import {
   fetchAsset,
   fetchContext,
@@ -29,20 +28,12 @@ const TwinFlow = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full items-center justify-center bg-accent text-sm text-muted-foreground">
+      <div className="flex h-full items-center justify-center bg-background text-sm text-muted-foreground">
         Loading digital twin…
       </div>
     ),
   },
 );
-
-const COLOR_OPTIONS: Array<{ id: TwinColorBy; label: string }> = [
-  { id: "residual", label: "Modeled residual" },
-  { id: "pressure", label: "Pressure" },
-  { id: "water-age", label: "Water age" },
-  { id: "water-temperature", label: "Modeled water temperature" },
-  { id: "target", label: "Projected target breach" },
-];
 
 export function TwinShell() {
   const params = useSearchParams();
@@ -116,48 +107,26 @@ export function TwinShell() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-foreground">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#0c0c0c] px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,.18)]">
-        <div className="flex items-center gap-4">
-          <AppNav current="twin" />
-        </div>
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
-          <label className="flex items-center gap-2 text-xs">
-            <span className="text-muted-foreground">Chemistry</span>
-            <select
-              className="max-w-[9rem] border border-white/15 bg-[#111214] px-2.5 py-1.5 text-[11px]"
-              value={chemistry}
-              onChange={(event) =>
-                setChemistry(event.target.value as ChemistryId)
-              }
-              aria-label="Chemistry profile"
-            >
-              <option value="FREE_CHLORINE">Free Chlorine</option>
-              <option value="MONOCHLORAMINE">Monochloramine</option>
-              <option value="CHLORINE_DIOXIDE" disabled>
-                Chlorine Dioxide (coming soon)
-              </option>
-            </select>
-          </label>
-          <button
-            type="button"
-            className="border border-water/25 bg-water/10 px-2.5 py-1.5 text-[11px] text-water"
-            onClick={() => setProvenanceOpen(true)}
-          >
-            Provenance
-          </button>
-          <Link href="/setup" className="text-[11px] text-muted-foreground hover:text-foreground">
-            Setup
-          </Link>
-          <span className="hidden sm:inline-flex"><ThemeToggle /></span>
-        </div>
-      </header>
+      <AppHeader current="twin">
+        <AppSelect
+          label="Chemistry"
+          value={chemistry}
+          onChange={(next) => setChemistry(next as ChemistryId)}
+        >
+          <option value="FREE_CHLORINE">Free Chlorine</option>
+          <option value="MONOCHLORAMINE">Monochloramine</option>
+          <option value="CHLORINE_DIOXIDE" disabled>
+            Chlorine Dioxide (coming soon)
+          </option>
+        </AppSelect>
+        <GhostButton onClick={() => setProvenanceOpen(true)}>Provenance</GhostButton>
+      </AppHeader>
 
       {twinQuery.error ? (
         <div
           role="alert"
-          className="border-b border-amber-700/40 bg-amber-950/30 px-4 py-2 text-sm"
+          className="border-b border-warning/40 bg-warning/10 px-4 py-2 text-sm"
         >
-          Provider or API error:{" "}
           {twinQuery.error instanceof Error
             ? twinQuery.error.message
             : "Digital twin data unavailable."}{" "}
@@ -167,15 +136,15 @@ export function TwinShell() {
 
       <StatusBar context={contextQuery.data ?? null} chemistry={chemistry} />
 
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-[#0c0c0c] px-4 py-2 font-mono text-[10px] uppercase tracking-[0.1em]">
-        <p>
-          <span className="text-muted-foreground">Scenario preview: </span>
+      <div className="flex items-center justify-between gap-3 border-b border-border bg-card px-4 py-2 text-[11px]">
+        <p className="flex items-center gap-1">
+          <span className="text-muted-foreground">Preview</span>
           <button
             type="button"
             className={`px-2 py-1 ${preview === "before" ? "bg-water/10 font-medium text-water" : "text-muted-foreground"}`}
             onClick={() => setPreview("before")}
           >
-            Before (baseline)
+            Before
           </button>
           <button
             type="button"
@@ -186,7 +155,7 @@ export function TwinShell() {
             After
           </button>
         </p>
-        <p className="text-muted-foreground">
+        <p className="font-mono text-[10px] text-muted-foreground">
           {graph
             ? `${graph.counts.nodes} nodes · ${graph.counts.edges} pipes · ${graph.counts.pumps} pumps`
             : "Loading topology…"}
@@ -244,8 +213,8 @@ export function TwinShell() {
               className="absolute left-3 right-3 top-3 z-10 rounded-md border border-border bg-card/95 px-3 py-2 text-xs shadow"
             >
               {appliedQuery.data?.afterAvailable
-                ? `${appliedQuery.data.heatNotice} After-state is the completed scenario applied to the digital twin. Decision-support simulation. No real infrastructure was actuated.`
-                : "After-state is unavailable. No completed scenario simulation has been applied. The schematic still shows the captured baseline. VeinGuard does not invent scenario results."}
+                ? `${appliedQuery.data.heatNotice} After-state is the applied scenario. No infrastructure was actuated.`
+                : "No applied scenario. Showing baseline — after-state is not invented."}
             </div>
           ) : null}
         </div>
@@ -268,146 +237,6 @@ export function TwinShell() {
         onClose={() => setProvenanceOpen(false)}
         payload={provenanceQuery.data ?? null}
       />
-    </div>
-  );
-}
-
-function LegendPanel({
-  open,
-  onToggle,
-  colorBy,
-  onColorBy,
-  selectedId,
-  traceDirection,
-  onTrace,
-  onClearTrace,
-  trace,
-  tracePending,
-  target,
-}: {
-  open: boolean;
-  onToggle: () => void;
-  colorBy: TwinColorBy;
-  onColorBy: (value: TwinColorBy) => void;
-  selectedId: string | null;
-  traceDirection: "upstream" | "downstream" | null;
-  onTrace: (direction: "upstream" | "downstream") => void;
-  onClearTrace: () => void;
-  trace: import("@/lib/operations").TwinTrace | null;
-  tracePending: boolean;
-  target: number | null;
-}) {
-  if (!open) {
-    return (
-      <button type="button" className="h-full w-full text-xs" onClick={onToggle}>
-        Legend
-      </button>
-    );
-  }
-  return (
-    <div className="flex h-full flex-col gap-3 overflow-auto p-3 text-xs">
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold">Legend</h2>
-        <button type="button" onClick={onToggle} className="text-muted-foreground">
-          Hide
-        </button>
-      </div>
-      <section>
-        <h3 className="mb-1 font-medium">Color by completed-run metric</h3>
-        <div className="flex flex-col gap-1">
-          {COLOR_OPTIONS.map((option) => (
-            <label key={option.id} className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="twin-color"
-                checked={colorBy === option.id}
-                onChange={() => onColorBy(option.id)}
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
-        <p className="mt-2 text-muted-foreground">
-          Unknown / not calculated is gray, not green.
-          {target != null ? ` Configured target ${target} mg/L.` : ""}
-        </p>
-        <div className="mt-2 h-2 rounded-full bg-gradient-to-r from-orange-700 to-blue-900" />
-        <div className="flex justify-between text-[10px] text-muted-foreground">
-          <span>Low / unknown</span>
-          <span>Higher modeled value</span>
-        </div>
-      </section>
-      <section>
-        <h3 className="mb-1 font-medium">Asset types</h3>
-        <ul className="space-y-1 text-muted-foreground">
-          <li>Circle — Junction</li>
-          <li>Trapezoid — Reservoir</li>
-          <li>Rectangle — Tank</li>
-          <li>Diamond — Pump</li>
-          <li>Bowtie — Valve</li>
-          <li>Red outline — projected target breach</li>
-        </ul>
-      </section>
-      <section>
-        <h3 className="mb-1 font-medium">Hydraulic trace</h3>
-        <p className="mb-2 text-muted-foreground">
-          Follows modeled flow sign at the selected sample time. Select an asset
-          first.
-        </p>
-        <div className="flex flex-col gap-1">
-          <button
-            type="button"
-            disabled={!selectedId}
-            className={`rounded border border-border px-2 py-1 text-left disabled:text-muted-foreground ${
-              traceDirection === "upstream" ? "bg-accent" : ""
-            }`}
-            onClick={() => onTrace("upstream")}
-          >
-            Upstream
-          </button>
-          <button
-            type="button"
-            disabled={!selectedId}
-            className={`rounded border border-border px-2 py-1 text-left disabled:text-muted-foreground ${
-              traceDirection === "downstream" ? "bg-accent" : ""
-            }`}
-            onClick={() => onTrace("downstream")}
-          >
-            Downstream
-          </button>
-          <button
-            type="button"
-            disabled={!traceDirection}
-            className="rounded border border-border px-2 py-1 text-left disabled:text-muted-foreground"
-            onClick={onClearTrace}
-          >
-            Clear trace
-          </button>
-        </div>
-        {tracePending ? (
-          <p className="mt-2 text-muted-foreground">Tracing…</p>
-        ) : null}
-        {trace ? (
-          <div className="mt-2 space-y-1">
-            <p>
-              {trace.direction} · {trace.nodeIds.length} nodes ·{" "}
-              {trace.edgeIds.length} links
-            </p>
-            <p className="text-muted-foreground">{trace.notice}</p>
-            {trace.supplyAssets.length > 0 ? (
-              <p>
-                Upstream tanks/reservoirs:{" "}
-                {trace.supplyAssets.map((item) => item.id).join(", ")}
-              </p>
-            ) : (
-              <p className="text-muted-foreground">
-                No tank/reservoir on this traced path. Supply share is not
-                invented.
-              </p>
-            )}
-          </div>
-        ) : null}
-      </section>
     </div>
   );
 }

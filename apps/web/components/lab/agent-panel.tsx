@@ -92,11 +92,8 @@ export function AgentPanel({ geminiConfigured }: { geminiConfigured: boolean }) 
 
   return (
     <div className="flex flex-col gap-3 text-xs">
-      <h2 className="font-semibold">Operations agent</h2>
-      <p className="text-muted-foreground">
-        Gemini proposes typed candidates only. Ranking is deterministic. No chain-of-thought is
-        shown.
-      </p>
+      <h2 className="font-medium">Agent</h2>
+      <p className="text-muted-foreground">Gemini proposes. Ranking is deterministic.</p>
       {!geminiConfigured ? (
         <p role="status" className="rounded-md border border-border px-2 py-1">
           Gemini is not configured. Manual scenario mode remains available.
@@ -127,7 +124,7 @@ export function AgentPanel({ geminiConfigured }: { geminiConfigured: boolean }) 
       <button
         type="button"
         disabled={!geminiConfigured || start.isPending}
-        className="rounded-md bg-accent px-3 py-1.5 font-medium disabled:text-muted-foreground"
+        className="border border-water bg-water px-3 py-1.5 font-medium text-accent-foreground disabled:opacity-40"
         onClick={() => start.mutate()}
       >
         {start.isPending ? "Queuing…" : "Start agent run"}

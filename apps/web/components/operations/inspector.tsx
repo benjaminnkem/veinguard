@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { AssetDetail } from "@/lib/operations";
+import { SidebarHeader, SidebarRail } from "@/components/app-chrome";
 
 interface InspectorProps {
   open: boolean;
@@ -19,56 +20,53 @@ export function Inspector({
   twinHref,
 }: InspectorProps) {
   if (!open) {
-    return (
-      <button type="button" className="h-full w-full text-xs" onClick={onToggle}>
-        Inspector
-      </button>
-    );
+    return <SidebarRail label="Inspector" onOpen={onToggle} />;
   }
   return (
-    <div className="flex h-full flex-col overflow-auto p-4 text-xs">
-      <div className="mb-4 flex items-center justify-between border-b border-white/10 pb-3">
-        <div><p className="font-mono text-[9px] uppercase tracking-[0.16em] text-water">Context inspector</p><h2 className="mt-1 text-sm font-medium">Modeled asset state</h2></div>
-        <button type="button" onClick={onToggle} className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground hover:text-foreground">
-          Close
-        </button>
-      </div>
+    <div className="flex h-full flex-col overflow-auto bg-card p-3 text-xs">
+      <SidebarHeader title="Inspector" onHide={onToggle} />
       {!detail ? (
-        <div className="border border-dashed border-white/15 bg-white/[.02] p-3 text-muted-foreground">
-          Select an asset on the map. Metrics are shown only when the run calculated them.
-        </div>
+        <p className="border border-dashed border-border bg-muted/60 px-3 py-3 text-muted-foreground">
+          Select an asset. Metrics appear only when the run calculated them.
+        </p>
       ) : (
-        <div className="space-y-3">
-          <div><p className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">{detail.type}</p><p className="mt-1 text-lg font-light">{detail.sourceId}</p></div>
+        <div className="space-y-4">
+          <div>
+            <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted-foreground">
+              {detail.type}
+            </p>
+            <p className="mt-0.5 text-lg font-light tracking-tight">{detail.sourceId}</p>
+            <p className="mt-1 font-mono text-[9px] text-muted-foreground">
+              EPA_BENCHMARK · SYNTHETIC_GEOREFERENCING
+            </p>
+          </div>
           {detail.chemistryState?.projectedTargetBreach ? (
             <p className="border border-danger/35 bg-danger/10 px-3 py-2 text-danger">
-              Projected target breach · configured operational target
+              Projected target breach
             </p>
           ) : null}
-          <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">EPA_BENCHMARK · SYNTHETIC_GEOREFERENCING</p>
           {detail.hydraulics ? (
             <section>
               <SectionTitle title="Hydraulics" />
-              <Metric label="Pressure (m)" value={detail.hydraulics.pressureM} />
-              <Metric label="Flow (m³/s)" value={detail.hydraulics.flowM3s} />
-              <Metric label="Velocity (m/s)" value={detail.hydraulics.velocityMs} />
-              <Metric label="Water age (h)" value={detail.hydraulics.waterAgeHours} />
+              <Metric label="Pressure" value={detail.hydraulics.pressureM} unit="m" />
+              <Metric label="Flow" value={detail.hydraulics.flowM3s} unit="m³/s" />
+              <Metric label="Velocity" value={detail.hydraulics.velocityMs} unit="m/s" />
+              <Metric label="Water age" value={detail.hydraulics.waterAgeHours} unit="h" />
             </section>
           ) : null}
           {detail.thermal ? (
             <section>
-              <SectionTitle title="Thermal state" />
+              <SectionTitle title="Thermal" />
+              <Metric label="FortyGuard cell" value={detail.thermal.fortyGuardCellId} />
               <Metric
-                label="FortyGuard cell"
-                value={detail.thermal.fortyGuardCellId}
-              />
-              <Metric
-                label="Associated air (°C)"
+                label="Associated air"
                 value={detail.thermal.associatedAirTemperatureC}
+                unit="°C"
               />
               <Metric
-                label="Modeled water (°C)"
+                label="Modeled water"
                 value={detail.thermal.modeledWaterTemperatureC}
+                unit="°C"
               />
             </section>
           ) : null}
@@ -76,21 +74,24 @@ export function Inspector({
             <section>
               <SectionTitle title="Chemistry" />
               <Metric
-                label="Modeled residual (mg/L)"
+                label="Modeled residual"
                 value={detail.chemistryState.residualMgL}
+                unit="mg/L"
               />
               <Metric
-                label="Configured target (mg/L)"
+                label="Configured target"
                 value={detail.chemistryState.operationalTargetMgL}
+                unit="mg/L"
               />
               {detail.chemistryState.freeAmmoniaMgNL != null ? (
                 <Metric
-                  label="Free ammonia (mg-N/L)"
+                  label="Free ammonia"
                   value={detail.chemistryState.freeAmmoniaMgNL}
+                  unit="mg-N/L"
                 />
               ) : null}
               {detail.chemistryState.nitrificationLabel ? (
-                <p className="mt-1 text-muted-foreground">
+                <p className="mt-1.5 text-muted-foreground">
                   {detail.chemistryState.nitrificationLevel}:{" "}
                   {detail.chemistryState.nitrificationLabel}
                 </p>
@@ -100,22 +101,20 @@ export function Inspector({
           <section>
             <SectionTitle title="Why?" />
             {detail.why && detail.why.length > 0 ? (
-              <ul className="list-disc pl-4">
+              <ul className="list-disc space-y-1 pl-4 text-[12px]">
                 {detail.why.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
             ) : (
-              <p className="text-muted-foreground">
-                No modeled drivers at this sample time.
-              </p>
+              <p className="text-muted-foreground">No modeled drivers at this sample time.</p>
             )}
           </section>
-          <div className="flex flex-col gap-1 pt-2">
+          <div className="flex flex-col gap-1.5 pt-1">
             {twinHref === null ? null : twinHref ? (
               <Link
                 href={twinHref}
-                className="border border-water/25 bg-water/10 px-3 py-2 text-left text-water hover:bg-water/15"
+                className="border border-water/30 bg-water/10 px-3 py-2 text-left text-water hover:bg-water/15"
               >
                 Open in Digital Twin
               </Link>
@@ -123,7 +122,7 @@ export function Inspector({
               <button
                 type="button"
                 disabled
-                className="border border-white/10 px-3 py-2 text-left text-muted-foreground"
+                className="border border-border px-3 py-2 text-left text-muted-foreground"
                 title="Select an asset first"
               >
                 Open in Digital Twin
@@ -131,16 +130,16 @@ export function Inspector({
             )}
             <Link
               href="/intervention-lab"
-              className="border border-white/10 px-3 py-2 text-left text-zinc-300 hover:border-white/25"
+              className="border border-border px-3 py-2 text-left hover:bg-muted"
             >
               Create scenario
             </Link>
             <button
               type="button"
-              className="border border-white/10 px-3 py-2 text-left text-zinc-300 hover:border-white/25"
+              className="border border-border px-3 py-2 text-left hover:bg-muted"
               onClick={onProvenance}
             >
-              View provenance
+              Provenance
             </button>
           </div>
         </div>
@@ -152,24 +151,30 @@ export function Inspector({
 function Metric({
   label,
   value,
+  unit,
 }: {
   label: string;
   value: string | number | null | undefined;
+  unit?: string;
 }) {
   const display =
     value == null || value === ""
       ? "Not calculated"
       : typeof value === "number"
-        ? value.toPrecision(4)
+        ? `${value.toPrecision(4)}${unit ? ` ${unit}` : ""}`
         : String(value);
   return (
-    <p className="flex justify-between gap-2 border-b border-white/[.06] py-1.5">
+    <p className="flex justify-between gap-2 border-b border-border py-1.5">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono text-zinc-200">{display}</span>
+      <span className="font-mono text-foreground">{display}</span>
     </p>
   );
 }
 
 function SectionTitle({ title }: { title: string }) {
-  return <h3 className="mb-1 font-mono text-[9px] uppercase tracking-[0.16em] text-water">{title}</h3>;
+  return (
+    <h3 className="mb-1 font-mono text-[9px] uppercase tracking-[0.16em] text-muted-foreground">
+      {title}
+    </h3>
+  );
 }

@@ -1,12 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AppNav } from "@/components/app-nav";
+import { AppHeader } from "@/components/app-chrome";
 import { StatusBar } from "@/components/operations/status-bar";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { fetchContext, operationsKeys } from "@/lib/operations";
 import {
   createStudy,
@@ -75,26 +73,20 @@ export function ResilienceShell() {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-background text-foreground">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-[#0c0c0c] px-4 py-3 shadow-[0_12px_40px_rgba(0,0,0,.18)]">
-        <div className="flex items-center gap-4">
-          <AppNav current="resilience" />
-        </div>
-        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
-          <Link href="/setup" className="text-[11px] text-muted-foreground hover:text-foreground">
-            Setup
-          </Link>
-          <span className="hidden sm:inline-flex"><ThemeToggle /></span>
-        </div>
-      </header>
+      <AppHeader current="resilience" />
       <StatusBar context={opsQuery.data ?? null} chemistry="FREE_CHLORINE" />
-      <div role="status" className="border-b border-white/10 bg-water/5 px-4 py-2 font-mono text-[10px] uppercase tracking-[0.1em] text-water">
+      <div role="status" className="border-b border-border bg-muted px-4 py-2 text-[11px] text-muted-foreground">
         {ctx?.notices.sample} {ctx?.notices.causation}
       </div>
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
-        <aside className="hidden w-72 shrink-0 overflow-auto border-r border-white/10 bg-[#0c0c0c] p-4 text-xs md:block">
-          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-water">Historical replay</p><h2 className="mb-2 mt-1 text-sm font-medium">New study</h2>
-          <p className="mb-2 text-muted-foreground">{ctx?.notices.captured}</p>
+        <aside className="hidden w-72 shrink-0 overflow-auto border-r border-border bg-card p-3 text-xs md:block">
+          <h2 className="mb-3 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+            New study
+          </h2>
+          <p className="mb-2 font-mono text-muted-foreground">
+            {ctx?.capturedEvent?.hour ?? "Captured hour unavailable"}
+          </p>
           <form
             className="flex flex-col gap-2"
             onSubmit={(event) => {
@@ -116,18 +108,14 @@ export function ResilienceShell() {
             }}
           >
             <label className="flex flex-col gap-1">
-              Additional HISTORICAL hour (optional)
+              Extra hour (optional)
               <input
-                className="rounded-md border border-border bg-card px-2 py-1"
+                className="border border-border bg-elevated px-2 py-1"
                 placeholder="2024-07-16T14:00:00Z"
                 value={extraHour}
                 onChange={(event) => setExtraHour(event.target.value)}
               />
             </label>
-            <p className="text-muted-foreground">
-              Extra hours are live or cached-real FortyGuard requests. Missing
-              hours stay failed; they are not invented.
-            </p>
             {error ? (
               <p role="alert" className="text-red-700 dark:text-red-300">
                 {error}
@@ -136,7 +124,7 @@ export function ResilienceShell() {
             <button
               type="submit"
               disabled={!ctx || create.isPending}
-              className="border border-water bg-water px-3 py-1.5 font-medium text-[#050505] disabled:opacity-40"
+              className="border border-water bg-water px-3 py-1.5 font-medium text-accent-foreground disabled:opacity-40"
             >
               {create.isPending ? "Queuing…" : "Start study"}
             </button>
@@ -302,7 +290,7 @@ function Card({
   note?: string;
 }) {
   return (
-    <article className="border border-white/10 bg-[#0c0c0c] px-3 py-3">
+    <article className="border border-border bg-card px-3 py-3">
       <p className="font-mono text-[9px] uppercase tracking-[0.12em] text-muted-foreground">
         {label}
       </p>

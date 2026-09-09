@@ -173,8 +173,7 @@ function TwinCanvas({
         position="bottom-center"
         className="rounded-md bg-card/90 px-2 py-1 text-[10px] text-muted-foreground shadow"
       >
-        View-only schematic · EPA_BENCHMARK · SYNTHETIC_GEOREFERENCING · arrows
-        follow modeled flow sign
+        EPA_BENCHMARK · SYNTHETIC_GEOREFERENCING · flow-signed arrows
       </Panel>
     </ReactFlow>
   );

@@ -28,12 +28,17 @@ export function RecurrenceMap({
     if (!el) {
       return;
     }
-    const map = new MapLibreMap({
-      container: el,
-      style: styleUrl,
-      center: [-74.01, 40.711],
-      zoom: 14.4,
-    });
+    let map: MapLibreMap;
+    try {
+      map = new MapLibreMap({
+        container: el,
+        style: styleUrl,
+        center: [-74.01, 40.711],
+        zoom: 14.4,
+      });
+    } catch {
+      return;
+    }
     mapRef.current = map;
     map.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
     map.on("load", () => {

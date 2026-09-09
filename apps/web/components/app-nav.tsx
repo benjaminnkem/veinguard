@@ -21,12 +21,12 @@ export function AppNav({
         <Image src="/brand/veinguard-mark.svg" alt="" width={22} height={22} priority />
         <span className="hidden font-medium tracking-[0.16em] text-foreground sm:inline">VEINGUARD</span>
       </Link>
-      <span className="mr-1 hidden h-4 w-px bg-white/10 sm:block" aria-hidden="true" />
+      <span className="mr-1 hidden h-4 w-px bg-border sm:block" aria-hidden="true" />
       {ITEMS.map((item) => {
         const active = item.id === current;
         const className = active
           ? "border border-water/30 bg-water/10 px-2.5 py-1.5 font-medium text-water"
-          : "border border-transparent px-2.5 py-1.5 text-muted-foreground hover:border-white/10 hover:text-foreground";
+          : "border border-transparent px-2.5 py-1.5 text-muted-foreground hover:border-border hover:text-foreground";
         return (
           <Link
             key={item.id}

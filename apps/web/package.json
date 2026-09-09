@@ -5,9 +5,9 @@
   "scripts": {
     "predev": "node ./scripts/copy-maplibre-worker.mjs",
     "prebuild": "node ./scripts/copy-maplibre-worker.mjs",
-    "dev": "next dev --port 3000",
+    "dev": "node api.js && next dev --port 3000",
     "build": "next build",
-    "start": "next start --port 3000",
+    "start": "node api.js && next start --port 3000",
     "lint": "eslint",
     "check-types": "tsc --noEmit",
     "test": "node -e \"process.exit(0)\""

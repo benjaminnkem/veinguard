@@ -17,7 +17,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check-types": "tsc -p tsconfig.json --noEmit",
-    "dev": "tsc -p tsconfig.json --watch --preserveWatchOutput",
+    "dev": "node api.js && tsc -p tsconfig.json --watch --preserveWatchOutput",
     "lint": "eslint . --max-warnings 0",
     "test": "jest"
   },
@@ -37,7 +37,11 @@
     "typescript": "5.9.2"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "json", "ts"],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
