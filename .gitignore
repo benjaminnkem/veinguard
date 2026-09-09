@@ -5,8 +5,6 @@ node_modules
 .venv
 
 # Local env files
-.env
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -49,3 +47,4 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+config.bat

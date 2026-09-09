@@ -6,47 +6,43 @@ import { useTheme } from "next-themes";
 const OPTIONS = [
   { value: "light", label: "Light" },
   { value: "dark", label: "Dark" },
-  { value: "system", label: "System" },
 ] as const;
 
 const emptySubscribe = () => () => undefined;
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
     () => false,
   );
-
-  if (!mounted) {
-    return (
-      <div className="inline-flex rounded-lg border border-border bg-card p-1" aria-hidden="true">
-        <span className="px-3 py-1.5 text-xs text-muted-foreground">Theme</span>
-      </div>
-    );
-  }
+  const active = mounted
+    ? theme === "light" || theme === "dark"
+      ? theme
+      : resolvedTheme === "light"
+        ? "light"
+        : "dark"
+    : "dark";
 
   return (
     <div
-      className="inline-flex rounded-lg border border-border bg-card p-1"
+      className="inline-flex border border-border bg-muted p-0.5"
       role="group"
       aria-label="Color theme"
     >
       {OPTIONS.map((option) => {
-        const selected = theme === option.value;
+        const selected = mounted && active === option.value;
         return (
           <button
             key={option.value}
             type="button"
-            onClick={() => {
-              setTheme(option.value);
-            }}
+            onClick={() => setTheme(option.value)}
             aria-pressed={selected}
             className={
               selected
-                ? "rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground"
-                : "rounded-md px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+                ? "bg-card px-2.5 py-1 text-[11px] font-medium text-foreground shadow-sm"
+                : "px-2.5 py-1 text-[11px] text-muted-foreground hover:text-foreground"
             }
           >
             {option.label}

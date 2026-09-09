@@ -100,7 +100,6 @@ export function ScenarioEditor({
         void submit();
       }}
     >
-      <h2 className="font-semibold">Manual scenario</h2>
       <p className="text-muted-foreground">{context.notices.time}</p>
       <label className="flex flex-col gap-1">
         Name
